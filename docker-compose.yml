@@ -1,0 +1,35 @@
+services:
+  meal-planner:
+    image: meal-planner:latest
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        - GITHUB_USERNAME=${GITHUB_USERNAME}
+        - GITHUB_PASSWORD=${GITHUB_PASSWORD}
+    container_name: meal-planner
+    ports:
+      - "${APP_PORT}:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=Host=meal-planner-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    restart: unless-stopped
+    depends_on:
+      meal-planner-db:
+        condition: service_started
+
+  meal-planner-db:
+    image: postgres:16-alpine
+    container_name: meal-planner-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - meal-planner-db-data:/var/lib/postgresql/data
+
+volumes:
+  meal-planner-db-data:
