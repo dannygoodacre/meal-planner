@@ -21,8 +21,8 @@ public sealed class FoodController(IAddFood addFood,
     {
         IResult<Guid> result = await addFood.ExecuteAsync(request.ToCommand(), cancellationToken);
 
-        return result is Success<Guid> success
-            ? CreatedAtAction(nameof(GetAsync), new { id = success.Value }, success.Value)
+        return result is Success<Guid>(var value)
+            ? CreatedAtAction(nameof(GetAsync), new { id = value }, value)
             : result.ToHttpResponse();
     }
 
