@@ -23,7 +23,7 @@ internal abstract class DeletePublicEntityHandler<TEntity>(ILogger logger,
         state.IsNonEmptyGuid(command.Id, nameof(command.Id));
     }
 
-    protected async override Task<Result> InternalExecuteAsync(DeletePublicEntityCommand command, CancellationToken cancellationToken = default)
+    protected async override Task<IResult> InternalExecuteAsync(DeletePublicEntityCommand command, CancellationToken cancellationToken = default)
     {
         TEntity? entity = await repository.GetWithTrackingAsync(command.Id, cancellationToken);
 
@@ -37,7 +37,7 @@ internal abstract class DeletePublicEntityHandler<TEntity>(ILogger logger,
         return Result.Success();
     }
 
-    public Task<Result> ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<IResult> ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
         => InternalExecuteAsync(new DeletePublicEntityCommand
         {
             Id = id

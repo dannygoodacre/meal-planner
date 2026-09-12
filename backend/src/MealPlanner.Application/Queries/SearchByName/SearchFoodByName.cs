@@ -1,14 +1,14 @@
 using DannyGoodacre.Primitives;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MealPlanner.Application.Queries;
 
 public interface ISearchFoodByName
 {
-    Task<Result<SearchResponse<FoodResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default);
+    Task<IResult<SearchResponse<FoodResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default);
 }
 
 internal sealed class SearchFoodByNameHandler(ILogger<SearchFoodByNameHandler> logger, IFoodRepository repository)

@@ -1,5 +1,5 @@
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 
 namespace MealPlanner.Application;
 

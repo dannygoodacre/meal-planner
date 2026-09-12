@@ -2,9 +2,9 @@ using DannyGoodacre.Cqrs.Testing;
 using DannyGoodacre.Primitives;
 using DannyGoodacre.Testing;
 using MealPlanner.Application.Abstractions.Repositories;
+using MealPlanner.Application.Entities;
 using MealPlanner.Application.Models;
 using MealPlanner.Application.Queries;
-using MealPlanner.Application.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -14,6 +14,7 @@ namespace MealPlanner.Application.Tests.Queries.GetPaginated;
 [TestFixture]
 internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginatedMealsHandler, PaginatedPublicEntityResponse<MealResponse>>
 {
+
     protected override string QueryName => "Get Paginated Meals";
 
     private int _requestLimit;
@@ -28,8 +29,8 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
 
     private Mock<IMealRepository> _foodRepositoryMock;
 
-    protected override Task<Result<PaginatedPublicEntityResponse<MealResponse>>> Act()
-        => QueryHandler.ExecuteAsync(_requestPage, _requestLimit, CancellationToken);
+    protected override Task<IResult<PaginatedPublicEntityResponse<MealResponse>>> Act()
+        => QueryHandler.ExecuteAsync(_requestPage, _requestLimit, TestCancellationToken);
 
     [SetUp]
     public void SetUp()
@@ -47,13 +48,21 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
 
         _requestPage = -1;
 
-        SetupLogger_FailedValidation($"Page:{Environment.NewLine}  - Must be greater than or equal to 0.{Environment.NewLine}Limit:{Environment.NewLine}  - Must be greater than 0.");
+        LoggerMock.IsEnabled();
+
+        LoggerMock.LogQueryFailedValidation(QueryName, $"Page:{Environment.NewLine}  - Must be greater than or equal to 0.{Environment.NewLine}Limit:{Environment.NewLine}  - Must be greater than 0.");
+
+        var testValidationState = new ValidationState();
+
+        testValidationState.AddError("Page", "Must be greater than or equal to 0.");
+
+        testValidationState.AddError("Limit", "Must be greater than 0.");
 
         // Act
         var result = await Act();
 
         // Assert
-        AssertInvalid(result);
+        AssertInvalid(result, testValidationState);
     }
 
     [Test]
@@ -75,6 +84,8 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
             TotalItemsCount = 0,
             TotalPagesCount = 0
         };
+
+        LoggerMock.IsEnabled();
 
         SetupLogger_QueryStarted();
 
@@ -109,6 +120,8 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
             TotalPagesCount = 4
         };
 
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupMealRepository_GetCountAsync();
@@ -141,6 +154,8 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
             TotalItemsCount = 11,
             TotalPagesCount = 4,
         };
+
+        LoggerMock.IsEnabled();
 
         SetupLogger_QueryStarted();
 
@@ -175,6 +190,8 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
             TotalPagesCount = 4
         };
 
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupMealRepository_GetCountAsync();
@@ -204,7 +221,7 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
     private void SetupMealRepository_GetCountAsync()
         => _foodRepositoryMock
             .Setup(x =>
-                x.GetCountAsync(It.Is<CancellationToken>(y => y == CancellationToken)))
+                x.GetCountAsync(It.Is<CancellationToken>(y => y == TestCancellationToken)))
             .ReturnsAsync(_testCount)
             .Verifiable(Times.Once);
 
@@ -214,7 +231,7 @@ internal sealed class GetPaginatedMealsTests : QueryHandlerTestBase<GetPaginated
                 x.GetPaginatedAsync(
                     It.Is<int>(y => y == _requestPage),
                     It.Is<int>(y => y == _requestLimit),
-                    It.Is<CancellationToken>(y => y == CancellationToken)))
+                    It.Is<CancellationToken>(y => y == TestCancellationToken)))
             .ReturnsAsync(_testMeals)
             .Verifiable(Times.Once);
 }

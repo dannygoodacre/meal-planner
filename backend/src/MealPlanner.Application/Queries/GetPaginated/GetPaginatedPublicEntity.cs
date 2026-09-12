@@ -26,7 +26,7 @@ internal abstract partial class GetPaginatedPublicEntityHandler<TEntity, TRespon
         state.IsPositive(query.Limit, nameof(query.Limit));
     }
 
-    protected async override Task<Result<PaginatedPublicEntityResponse<TResponse>>> InternalExecuteAsync(GetPaginatedPublicEntityQuery query, CancellationToken cancellationToken = default)
+    protected async override Task<IResult<PaginatedPublicEntityResponse<TResponse>>> InternalExecuteAsync(GetPaginatedPublicEntityQuery query, CancellationToken cancellationToken = default)
     {
         LogQueryStarted(Logger, QueryName, query.Page, query.Limit);
 
@@ -46,7 +46,7 @@ internal abstract partial class GetPaginatedPublicEntityHandler<TEntity, TRespon
         });
     }
 
-    public Task<Result<PaginatedPublicEntityResponse<TResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default)
+    public Task<IResult<PaginatedPublicEntityResponse<TResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default)
         => ExecuteAsync(new GetPaginatedPublicEntityQuery
         {
             Page = page,

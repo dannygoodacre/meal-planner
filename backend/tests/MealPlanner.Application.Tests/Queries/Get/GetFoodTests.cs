@@ -2,10 +2,10 @@ using DannyGoodacre.Cqrs.Testing;
 using DannyGoodacre.Primitives;
 using DannyGoodacre.Testing;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
-using MealPlanner.Application.Queries;
 using MealPlanner.Application.Entities;
 using MealPlanner.Application.Enums;
+using MealPlanner.Application.Models;
+using MealPlanner.Application.Queries;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -19,8 +19,8 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
 
     private Guid _requestId;
 
-    protected override Task<Result<FoodResponse>> Act()
-        => QueryHandler.ExecuteAsync(_requestId, CancellationToken);
+    protected override Task<IResult<FoodResponse>> Act()
+        => QueryHandler.ExecuteAsync(_requestId, TestCancellationToken);
 
     private Mock<IFoodRepository> _foodRepositoryMock;
 
@@ -64,13 +64,19 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         // Arrange
         _requestId = Guid.Empty;
 
-        SetupLogger_FailedValidation($"Id:{Environment.NewLine}  - Must not be empty.");
+        LoggerMock.IsEnabled();
+
+        LoggerMock.LogQueryFailedValidation(QueryName, $"Id:{Environment.NewLine}  - Must not be empty.");
+
+        var testValidationState = new ValidationState();
+
+        testValidationState.AddError("Id", "Must not be empty.");
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
-        AssertInvalid(result);
+        AssertInvalid(result, testValidationState);
     }
 
     [Test]
@@ -79,6 +85,8 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         // Arrange
         _testFood = null!;
 
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupFoodRepository_GetAsync();
@@ -86,7 +94,7 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         SetupLogger_NotFound();
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
         AssertNotFound(result);
@@ -96,12 +104,14 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
     public async Task WhenFoodIsFound_ShouldReturnSuccess()
     {
         // Arrange
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupFoodRepository_GetAsync();
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
         AssertSuccess(result, _testResponse);
@@ -114,7 +124,7 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         => _foodRepositoryMock
             .Setup(x => x.GetAsync(
                 It.Is<Guid>(y => y == _requestId),
-                It.Is<CancellationToken>(y => y == CancellationToken)))
+                It.Is<CancellationToken>(y => y == TestCancellationToken)))
             .ReturnsAsync(_testFood)
             .Verifiable(Times.Once);
 

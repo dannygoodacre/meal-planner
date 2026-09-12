@@ -8,7 +8,7 @@ namespace MealPlanner.Application.Commands;
 
 public interface IDeleteMeal
 {
-    Task<Result> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IResult> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 internal sealed class DeleteMealHandler(ILogger<DeleteMealHandler> logger,

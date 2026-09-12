@@ -22,7 +22,7 @@ internal abstract partial class SearchPublicEntityByNameHandler<TEntity, TRespon
         state.IsMinimumLength(query.SearchTerm, 3, nameof(query.SearchTerm));
     }
 
-    protected async override Task<Result<SearchResponse<TResponse>>> InternalExecuteAsync(SearchPublicEntityByNameQuery query, CancellationToken cancellationToken = default)
+    protected async override Task<IResult<SearchResponse<TResponse>>> InternalExecuteAsync(SearchPublicEntityByNameQuery query, CancellationToken cancellationToken = default)
     {
         LogQueryStarted(Logger, query.SearchTerm, query.SearchTerm);
 
@@ -36,7 +36,7 @@ internal abstract partial class SearchPublicEntityByNameHandler<TEntity, TRespon
         });
     }
 
-    public Task<Result<SearchResponse<TResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default)
+    public Task<IResult<SearchResponse<TResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default)
         => ExecuteAsync(new SearchPublicEntityByNameQuery
         {
             SearchTerm = searchTerm

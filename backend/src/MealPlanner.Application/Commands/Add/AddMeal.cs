@@ -1,8 +1,8 @@
 using DannyGoodacre.Cqrs;
 using DannyGoodacre.Primitives;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MealPlanner.Application.Commands;
@@ -16,7 +16,7 @@ public record AddMealCommand : ICommand
 
 public interface IAddMeal
 {
-    Task<Result<Guid>> ExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default);
+    Task<IResult<Guid>> ExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default);
 }
 
 internal sealed partial class AddMealHandler(ILogger<AddMealHandler> logger,
@@ -41,7 +41,7 @@ internal sealed partial class AddMealHandler(ILogger<AddMealHandler> logger,
         });
     }
 
-    protected async override Task<Result<Guid>> InternalExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default)
+    protected async override Task<IResult<Guid>> InternalExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default)
     {
         LogCommandStarted(Logger, CommandName, command.Name);
 
@@ -90,7 +90,7 @@ internal sealed partial class AddMealHandler(ILogger<AddMealHandler> logger,
         return Result.Success(meal.PublicId);
     }
 
-    public new Task<Result<Guid>> ExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default)
+    public new Task<IResult<Guid>> ExecuteAsync(AddMealCommand command, CancellationToken cancellationToken = default)
         => base.ExecuteAsync(command, cancellationToken);
 
     [LoggerMessage(LogLevel.Information, "Command '{Command}' started for Name '{Name}'.")]

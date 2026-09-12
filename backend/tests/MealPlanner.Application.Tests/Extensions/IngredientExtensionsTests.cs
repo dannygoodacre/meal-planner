@@ -1,7 +1,7 @@
 using DannyGoodacre.Testing;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
 using MealPlanner.Application.Enums;
+using MealPlanner.Application.Models;
 using NUnit.Framework;
 
 namespace MealPlanner.Application.Tests.Extensions;

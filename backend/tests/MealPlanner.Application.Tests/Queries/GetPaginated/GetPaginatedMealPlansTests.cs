@@ -3,8 +3,8 @@ using DannyGoodacre.Primitives;
 using DannyGoodacre.Testing;
 using MealPlanner.Application;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using MealPlanPlanner.Application.Queries;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -29,8 +29,8 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
 
     private Mock<IMealPlanRepository> _foodRepositoryMock;
 
-    protected override Task<Result<PaginatedPublicEntityResponse<MealPlanResponse>>> Act()
-        => QueryHandler.ExecuteAsync(_requestPage, _requestLimit, CancellationToken);
+    protected override Task<IResult<PaginatedPublicEntityResponse<MealPlanResponse>>> Act()
+        => QueryHandler.ExecuteAsync(_requestPage, _requestLimit, TestCancellationToken);
 
     [SetUp]
     public void SetUp()
@@ -48,13 +48,21 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
 
         _requestPage = -1;
 
-        SetupLogger_FailedValidation($"Page:{Environment.NewLine}  - Must be greater than or equal to 0.{Environment.NewLine}Limit:{Environment.NewLine}  - Must be greater than 0.");
+        LoggerMock.IsEnabled();
+
+        LoggerMock.LogQueryFailedValidation(QueryName, $"Page:{Environment.NewLine}  - Must be greater than or equal to 0.{Environment.NewLine}Limit:{Environment.NewLine}  - Must be greater than 0.");
+
+        var testValidationState = new ValidationState();
+
+        testValidationState.AddError("Page", "Must be greater than or equal to 0.");
+
+        testValidationState.AddError("Limit", "Must be greater than 0.");
 
         // Act
         var result = await Act();
 
         // Assert
-        AssertInvalid(result);
+        AssertInvalid(result, testValidationState);
     }
 
     [Test]
@@ -76,6 +84,8 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
             TotalItemsCount = 0,
             TotalPagesCount = 0
         };
+
+        LoggerMock.IsEnabled();
 
         SetupLogger_QueryStarted();
 
@@ -110,6 +120,8 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
             TotalPagesCount = 4
         };
 
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupMealPlanRepository_GetCountAsync();
@@ -142,6 +154,8 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
             TotalItemsCount = 11,
             TotalPagesCount = 4,
         };
+
+        LoggerMock.IsEnabled();
 
         SetupLogger_QueryStarted();
 
@@ -176,6 +190,8 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
             TotalPagesCount = 4
         };
 
+        LoggerMock.IsEnabled();
+
         SetupLogger_QueryStarted();
 
         SetupMealPlanRepository_GetCountAsync();
@@ -205,7 +221,7 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
     private void SetupMealPlanRepository_GetCountAsync()
         => _foodRepositoryMock
             .Setup(x =>
-                x.GetCountAsync(It.Is<CancellationToken>(y => y == CancellationToken)))
+                x.GetCountAsync(It.Is<CancellationToken>(y => y == TestCancellationToken)))
             .ReturnsAsync(_testCount)
             .Verifiable(Times.Once);
 
@@ -215,7 +231,7 @@ internal sealed class GetPaginatedMealPlansTests : QueryHandlerTestBase<GetPagin
                 x.GetPaginatedAsync(
                     It.Is<int>(y => y == _requestPage),
                     It.Is<int>(y => y == _requestLimit),
-                    It.Is<CancellationToken>(y => y == CancellationToken)))
+                    It.Is<CancellationToken>(y => y == TestCancellationToken)))
             .ReturnsAsync(_testMealPlans)
             .Verifiable(Times.Once);
 }

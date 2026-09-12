@@ -1,14 +1,14 @@
 using DannyGoodacre.Primitives;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MealPlanner.Application.Queries;
 
 public interface IGetPaginatedFoods
 {
-    Task<Result<PaginatedPublicEntityResponse<FoodResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default);
+    Task<IResult<PaginatedPublicEntityResponse<FoodResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default);
 }
 
 internal sealed class GetPaginatedFoodsHandler(ILogger<GetPaginatedFoodsHandler> logger, IFoodRepository repository)

@@ -1,14 +1,14 @@
 using DannyGoodacre.Primitives;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MealPlanner.Application.Queries;
 
 public interface IGetFood
 {
-    Task<Result<FoodResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IResult<FoodResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 internal sealed class GetFoodHandler(ILogger<GetFoodHandler> logger, IFoodRepository repository)
