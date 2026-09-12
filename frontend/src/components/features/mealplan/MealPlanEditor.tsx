@@ -155,6 +155,7 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
               <TableHead>Carbs (g)</TableHead>
               <TableHead>Fat (g)</TableHead>
               <TableHead>Fibre (g)</TableHead>
+              <TableHead>Salt (g)</TableHead>
               <TableHead className='w-10' />
             </TableRow>
           </TableHeader>

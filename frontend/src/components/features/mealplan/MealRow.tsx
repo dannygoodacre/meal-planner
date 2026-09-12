@@ -117,6 +117,7 @@ export function MealRow({
         <TableCell>{round(mealMacros.carbohydrates)}</TableCell>
         <TableCell>{round(mealMacros.fat)}</TableCell>
         <TableCell>{round(mealMacros.fibre)}</TableCell>
+        <TableCell>{round(mealMacros.salt)}</TableCell>
 
         <TableCell className='w-10 pr-4 text-right'>
           {isEditable && (
@@ -146,10 +147,17 @@ export function MealRow({
                     <TableHead className='text-xs'>Ingredient</TableHead>
                     <TableHead className='text-xs w-36 min-w-36'>Quantity</TableHead>
                     <TableHead className='text-xs text-right w-20'>Cals</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Protein</TableHead>
+                    <TableHead className='text-xs text-right w-20 px-8'>Protein</TableHead>
                     <TableHead className='text-xs text-right w-20'>Carbs</TableHead>
+                    <TableHead className='text-xs text-left w-20'>
+                      <span className='text-muted-foreground'>(Sugars)</span>
+                    </TableHead>
                     <TableHead className='text-xs text-right w-20'>Fat</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Fibre</TableHead>
+                    <TableHead className='text-xs text-left w-20'>
+                      <span className='text-muted-foreground'>(Sats)</span>
+                    </TableHead>
+                    <TableHead className='text-xs text-right w-20 px-8'>Fibre</TableHead>
+                    <TableHead className='text-xs text-right w-20'>Salt</TableHead>
                     <TableHead className='w-10' />
                   </TableRow>
                 </TableHeader>
@@ -169,8 +177,11 @@ export function MealRow({
                     const liveCals = scaleMacro(currentIng.food?.calories || 0, quantity, referenceQuantity);
                     const liveProtein = scaleMacro(currentIng.food?.protein || 0, quantity, referenceQuantity);
                     const liveCarbs = scaleMacro(currentIng.food?.carbohydrates || 0, quantity, referenceQuantity);
+                    const liveSugars = scaleMacro(currentIng.food?.sugar || 0, quantity, referenceQuantity);
                     const liveFat = scaleMacro(currentIng.food?.fat || 0, quantity, referenceQuantity);
+                    const liveSats = scaleMacro(currentIng.food?.saturatedFat || 0, quantity, referenceQuantity);
                     const liveFibre = scaleMacro(currentIng.food?.fibre || 0, quantity, referenceQuantity);
+                    const liveSalt = scaleMacro(currentIng.food?.salt || 0, quantity, referenceQuantity);
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
@@ -232,10 +243,17 @@ export function MealRow({
                         </TableCell>
 
                         <TableCell className='py-2 text-right w-20'>{round(liveCals)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveProtein)}</TableCell>
+                        <TableCell className='py-2 text-right w-20 px-8'>{round(liveProtein)}</TableCell>
                         <TableCell className='py-2 text-right w-20'>{round(liveCarbs)}</TableCell>
+                        <TableCell className='py-2 text-left w-20'>
+                          <span className='text-muted-foreground'>{round(liveSugars)}</span>
+                        </TableCell>
                         <TableCell className='py-2 text-right w-20'>{round(liveFat)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-left w-20'>
+                          <span className='text-muted-foreground'>{round(liveSats)}</span>
+                        </TableCell>
+                        <TableCell className='py-2 text-right w-20 px-8'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-20'>{round(liveSalt, 2)}</TableCell>
 
                         <TableCell className='py-1 w-10 pr-2 text-right'>
                           {isEditable && (

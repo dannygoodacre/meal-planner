@@ -87,7 +87,7 @@ public class ApplicationContext(DbContextOptions<ApplicationContext> options) : 
             entity.HasOne(x => x.MealPlan)
                 .WithMany(x => x.Meals)
                 .HasForeignKey(x => x.MealPlanId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
