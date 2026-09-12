@@ -14,7 +14,7 @@ public sealed record UpdateMealCommand : AddMealCommand
 
 public interface IUpdateMeal
 {
-    Task<Result<Guid>> ExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default);
+    Task<IResult<Guid>> ExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default);
 }
 
 internal sealed partial class UpdateMealHandler(ILogger<UpdateMealHandler> logger,
@@ -25,7 +25,7 @@ internal sealed partial class UpdateMealHandler(ILogger<UpdateMealHandler> logge
 {
     protected override string CommandName => "Update Meal";
 
-    protected async override Task<Result<Guid>> InternalExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default)
+    protected async override Task<IResult<Guid>> InternalExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default)
     {
         LogCommandStarted(Logger, CommandName, command.Id);
 
@@ -79,7 +79,7 @@ internal sealed partial class UpdateMealHandler(ILogger<UpdateMealHandler> logge
         return Result.Success(command.Id);
     }
 
-    public new Task<Result<Guid>> ExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default)
+    public new Task<IResult<Guid>> ExecuteAsync(UpdateMealCommand command, CancellationToken cancellationToken = default)
         => base.ExecuteAsync(command, cancellationToken);
 
     [LoggerMessage(LogLevel.Information, "Command '{Command}' started for Meal Id '{MealId}'.")]

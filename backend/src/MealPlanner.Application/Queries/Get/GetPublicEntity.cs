@@ -21,7 +21,7 @@ internal abstract partial class GetPublicEntityHandler<TEntity, TResponse>(ILogg
         state.IsNonEmptyGuid(query.Id, nameof(query.Id));
     }
 
-    protected async override Task<Result<TResponse>> InternalExecuteAsync(GetPublicEntityQuery query, CancellationToken cancellationToken = default)
+    protected async override Task<IResult<TResponse>> InternalExecuteAsync(GetPublicEntityQuery query, CancellationToken cancellationToken = default)
     {
         LogQueryStarted(Logger, QueryName, query.Id);
 
@@ -37,7 +37,7 @@ internal abstract partial class GetPublicEntityHandler<TEntity, TResponse>(ILogg
         return Result<TResponse>.NotFound();
     }
 
-    public Task<Result<TResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<IResult<TResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
         => ExecuteAsync(new GetPublicEntityQuery
         {
             Id = id

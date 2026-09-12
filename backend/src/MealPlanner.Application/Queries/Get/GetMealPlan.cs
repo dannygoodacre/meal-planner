@@ -8,7 +8,7 @@ namespace MealPlanner.Application.Queries;
 
 public interface IGetMealPlan
 {
-    Task<Result<MealPlanResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IResult<MealPlanResponse>> ExecuteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 internal sealed class GetMealPlanHandler(ILogger<GetMealPlanHandler> logger, IMealPlanRepository repository)

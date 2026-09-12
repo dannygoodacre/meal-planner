@@ -1,38 +1,39 @@
 using DannyGoodacre.Primitives;
 using Microsoft.AspNetCore.Mvc;
+using IResult = DannyGoodacre.Primitives.IResult;
 
 namespace MealPlanner.Web;
 
 internal static class ResultExtensions
 {
-    public static IActionResult ToHttpResponse(this Result result)
-        => result.Status switch
+    public static IActionResult ToHttpResponse(this IResult result)
+        => result switch
         {
-            Status.Success => new NoContentResult(),
+            Success => new NoContentResult(),
 
-            Status.Invalid => new BadRequestObjectResult(result.ValidationState!.ToValidationProblemDetails()),
+            Invalid invalid => new BadRequestObjectResult(invalid.ValidationState.ToValidationProblemDetails()),
 
-            Status.Conflict => new ConflictObjectResult(result.Error),
+            Conflict conflict => new ConflictObjectResult(conflict.Message),
 
-            Status.DomainError => new UnprocessableEntityObjectResult(result.Error),
+            DomainError domainError => new UnprocessableEntityObjectResult(domainError.Message),
 
-            Status.NotFound => new NotFoundResult(),
+            NotFound => new NotFoundResult(),
 
             _ => new StatusCodeResult(500)
         };
 
-    public static IActionResult ToHttpResponse<T>(this Result<T> result)
-        => result.Status switch
+    public static IActionResult ToHttpResponse<T>(this IResult<T> result)
+        => result switch
         {
-            Status.Success => new OkObjectResult(result.Value),
+            Success<T> success => new OkObjectResult(success.Value),
 
-            Status.Invalid => new BadRequestObjectResult(result.ValidationState!.ToValidationProblemDetails()),
+            Invalid invalid => new BadRequestObjectResult(invalid.ValidationState!.ToValidationProblemDetails()),
 
-            Status.Conflict => new ConflictObjectResult(result.Error),
+            Conflict conflict => new ConflictObjectResult(conflict.Message),
 
-            Status.DomainError => new UnprocessableEntityObjectResult(result.Error),
+            DomainError domainError => new UnprocessableEntityObjectResult(domainError.Message),
 
-            Status.NotFound => new NotFoundResult(),
+            NotFound => new NotFoundResult(),
 
             _ => new StatusCodeResult(500)
         };

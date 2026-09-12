@@ -8,7 +8,7 @@ namespace MealPlanner.Application.Queries;
 
 public interface ISearchFoodByName
 {
-    Task<Result<SearchResponse<FoodResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default);
+    Task<IResult<SearchResponse<FoodResponse>>> ExecuteAsync(string searchTerm, CancellationToken cancellationToken = default);
 }
 
 internal sealed class SearchFoodByNameHandler(ILogger<SearchFoodByNameHandler> logger, IFoodRepository repository)

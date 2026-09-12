@@ -12,11 +12,11 @@ internal static class ValidationStateExtensions
         {
             ModelStateDictionary modelState = new();
 
-            foreach (KeyValuePair<string, IEnumerable<string>> kvp in state.Errors)
+            foreach ((string key, IReadOnlyList<string> value) in state.Errors)
             {
-                foreach (string error in kvp.Value)
+                foreach (string error in value)
                 {
-                    modelState.AddModelError(kvp.Key, error);
+                    modelState.AddModelError(key, error);
                 }
             }
 

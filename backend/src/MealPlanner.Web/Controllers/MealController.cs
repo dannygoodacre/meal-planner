@@ -4,6 +4,7 @@ using MealPlanner.Application.Models;
 using MealPlanner.Application.Queries;
 using MealPlanner.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using IResult = DannyGoodacre.Primitives.IResult;
 
 namespace MealPlanner.Web.Controllers;
 
@@ -18,10 +19,10 @@ public sealed class MealController(IAddMeal addMeal,
     [HttpPost]
     public async Task<IActionResult> AddMealAsync([FromBody] AddMealRequest request, CancellationToken cancellationToken)
     {
-        Result<Guid> result = await addMeal.ExecuteAsync(request.ToCommand(), cancellationToken);
+        IResult<Guid> result = await addMeal.ExecuteAsync(request.ToCommand(), cancellationToken);
 
-        return result.IsSuccess
-            ? CreatedAtAction(nameof(GetAsync), new { id = result.Value }, result.Value)
+        return result is Success<Guid>(var value)
+            ? CreatedAtAction(nameof(GetAsync), new { id = value }, value)
             : result.ToHttpResponse();
     }
 
@@ -29,7 +30,7 @@ public sealed class MealController(IAddMeal addMeal,
     [ActionName(nameof(GetAsync))]
     public async Task<IActionResult> GetAsync(Guid id, CancellationToken cancellationToken)
     {
-        Result<MealResponse> result = await getMeal.ExecuteAsync(id, cancellationToken);
+        IResult<MealResponse> result = await getMeal.ExecuteAsync(id, cancellationToken);
 
         return result.ToHttpResponse();
     }
@@ -37,7 +38,7 @@ public sealed class MealController(IAddMeal addMeal,
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateMealRequest request, CancellationToken cancellationToken)
     {
-        Result<Guid> result = await updateMeal.ExecuteAsync(request.ToCommand(id), cancellationToken);
+        IResult<Guid> result = await updateMeal.ExecuteAsync(request.ToCommand(id), cancellationToken);
 
         return result.ToHttpResponse();
     }
@@ -45,7 +46,7 @@ public sealed class MealController(IAddMeal addMeal,
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        Result result = await deleteMeal.ExecuteAsync(id, cancellationToken);
+        IResult result = await deleteMeal.ExecuteAsync(id, cancellationToken);
 
         return result.ToHttpResponse();
     }
@@ -53,7 +54,7 @@ public sealed class MealController(IAddMeal addMeal,
     [HttpGet("search")]
     public async Task<IActionResult> SearchAsync([FromQuery(Name = "q")] string searchTerm, CancellationToken cancellationToken)
     {
-        Result<SearchResponse<MealResponse>> result = await searchMealByName.ExecuteAsync(searchTerm, cancellationToken);
+        IResult<SearchResponse<MealResponse>> result = await searchMealByName.ExecuteAsync(searchTerm, cancellationToken);
 
         return result.ToHttpResponse();
     }

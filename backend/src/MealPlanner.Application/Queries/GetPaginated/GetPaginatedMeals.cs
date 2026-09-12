@@ -8,7 +8,7 @@ namespace MealPlanner.Application.Queries;
 
 public interface IGetPaginatedMeals
 {
-    Task<Result<PaginatedPublicEntityResponse<MealResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default);
+    Task<IResult<PaginatedPublicEntityResponse<MealResponse>>> ExecuteAsync(int page, int limit, CancellationToken cancellationToken = default);
 }
 
 internal sealed class GetPaginatedMealsHandler(ILogger<GetPaginatedMealsHandler> logger, IMealRepository repository)
