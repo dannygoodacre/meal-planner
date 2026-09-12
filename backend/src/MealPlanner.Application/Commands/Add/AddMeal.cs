@@ -1,8 +1,8 @@
 using DannyGoodacre.Cqrs;
 using DannyGoodacre.Primitives;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
 using MealPlanner.Application.Entities;
+using MealPlanner.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MealPlanner.Application.Commands;

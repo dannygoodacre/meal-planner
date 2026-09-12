@@ -1,4 +1,3 @@
-using DannyGoodacre.Cqrs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MealPlanner.Application;

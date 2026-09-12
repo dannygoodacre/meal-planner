@@ -2,10 +2,10 @@ using DannyGoodacre.Cqrs.Testing;
 using DannyGoodacre.Primitives;
 using DannyGoodacre.Testing;
 using MealPlanner.Application.Abstractions.Repositories;
-using MealPlanner.Application.Models;
-using MealPlanner.Application.Queries;
 using MealPlanner.Application.Entities;
 using MealPlanner.Application.Enums;
+using MealPlanner.Application.Models;
+using MealPlanner.Application.Queries;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -73,7 +73,7 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         testValidationState.AddError("Id", "Must not be empty.");
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
         AssertInvalid(result, testValidationState);
@@ -94,7 +94,7 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         SetupLogger_NotFound();
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
         AssertNotFound(result);
@@ -111,7 +111,7 @@ internal sealed class GetFoodTests : QueryHandlerTestBase<GetFoodHandler, FoodRe
         SetupFoodRepository_GetAsync();
 
         // Act
-        var result = await Act();
+        IResult<FoodResponse> result = await Act();
 
         // Assert
         AssertSuccess(result, _testResponse);
