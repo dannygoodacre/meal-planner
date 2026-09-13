@@ -139,7 +139,7 @@ export function MealRow({
 
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
-          <TableCell colSpan={8} className='py-6 px-12'>
+          <TableCell colSpan={10} className='py-6 px-12'>
             <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
               <Table>
                 <TableHeader className='bg-muted/50'>
@@ -147,7 +147,7 @@ export function MealRow({
                     <TableHead className='text-xs'>Ingredient</TableHead>
                     <TableHead className='text-xs w-36 min-w-36'>Quantity</TableHead>
                     <TableHead className='text-xs text-right w-20'>Cals</TableHead>
-                    <TableHead className='text-xs text-right w-20 px-8'>Protein</TableHead>
+                    <TableHead className='text-xs text-right w-20'>Protein</TableHead>
                     <TableHead className='text-xs text-right w-20'>Carbs</TableHead>
                     <TableHead className='text-xs text-left w-20'>
                       <span className='text-muted-foreground'>(Sugars)</span>
@@ -156,7 +156,7 @@ export function MealRow({
                     <TableHead className='text-xs text-left w-20'>
                       <span className='text-muted-foreground'>(Sats)</span>
                     </TableHead>
-                    <TableHead className='text-xs text-right w-20 px-8'>Fibre</TableHead>
+                    <TableHead className='text-xs text-right w-20'>Fibre</TableHead>
                     <TableHead className='text-xs text-right w-20'>Salt</TableHead>
                     <TableHead className='w-10' />
                   </TableRow>
@@ -164,7 +164,7 @@ export function MealRow({
                 <TableBody>
                   {ingredients.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={8} className='text-center py-4 text-xs text-muted-foreground italic'>
+                      <TableCell colSpan={11} className='text-center py-4 text-xs text-muted-foreground italic'>
                         No ingredients added yet.
                       </TableCell>
                     </TableRow>
@@ -243,7 +243,7 @@ export function MealRow({
                         </TableCell>
 
                         <TableCell className='py-2 text-right w-20'>{round(liveCals)}</TableCell>
-                        <TableCell className='py-2 text-right w-20 px-8'>{round(liveProtein)}</TableCell>
+                        <TableCell className='py-2 text-right w-20'>{round(liveProtein)}</TableCell>
                         <TableCell className='py-2 text-right w-20'>{round(liveCarbs)}</TableCell>
                         <TableCell className='py-2 text-left w-20'>
                           <span className='text-muted-foreground'>{round(liveSugars)}</span>
@@ -252,7 +252,7 @@ export function MealRow({
                         <TableCell className='py-2 text-left w-20'>
                           <span className='text-muted-foreground'>{round(liveSats)}</span>
                         </TableCell>
-                        <TableCell className='py-2 text-right w-20 px-8'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-20'>{round(liveFibre)}</TableCell>
                         <TableCell className='py-2 text-right w-20'>{round(liveSalt, 2)}</TableCell>
 
                         <TableCell className='py-1 w-10 pr-2 text-right'>
