@@ -154,27 +154,23 @@ export function MealRow({
       {/* EXPANDED INGREDIENT SUB-TABLE */}
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
-          <TableCell colSpan={10} className='py-6 px-6'>
+          <TableCell colSpan={11} className='py-6'>
             <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
               {/* Fixed: Added table-fixed w-full here */}
-              <Table className='table-fixed w-full'>
+              <Table className='table-fixed'>
                 <TableHeader className='bg-muted/50'>
                   <TableRow>
-                    {/* Left section: 30% total (23% Ingredient + 7% Quantity) */}
                     <TableHead className='text-xs w-[29%]'>Ingredient</TableHead>
-                    <TableHead className='text-xs w-[7%] min-w-20'>Quantity</TableHead>
+                    <TableHead className='text-xs w-[7%]'>Quantity</TableHead>
 
-                    {/* 6 Equal Macro Groups: 11% each (66% total) */}
-                    <TableHead className='text-xs text-right w-[11%]'>Cals</TableHead>
+                    <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
                     <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
 
-                    {/* Carbs Group: 7% + 4% = 11% */}
                     <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
                     <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                       <span className='text-muted-foreground'>(Sugars)</span>
                     </TableHead>
 
-                    {/* Fat Group: 7% + 4% = 11% */}
                     <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
                     <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                       <span className='text-muted-foreground'>(Sat)</span>
@@ -183,8 +179,8 @@ export function MealRow({
                     <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
                     <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
 
-                    {/* Remaining ~4% space allocated to the fixed-width action column */}
-                    <TableHead className='w-10' />
+                    {!isEditable && <TableHead className='w-[1%]' />}
+                    {isEditable && <TableHead className='w-10' />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -242,7 +238,7 @@ export function MealRow({
                           )}
                         </TableCell>
 
-                        <TableCell className='py-1 w-[30%]'>
+                        <TableCell className='py-1 w-[36%]'>
                           {isEditable ? (
                             <div className='flex items-center gap-1.5 w-full'>
                               <Controller
@@ -286,8 +282,8 @@ export function MealRow({
                         <TableCell className='py-2 text-right w-[11%]'>{round(liveFibre)}</TableCell>
                         <TableCell className='py-2 text-right w-[11%]'>{round(liveSalt, 2)}</TableCell>
 
-                        <TableCell className='py-1 w-10 pr-2 text-right'>
-                          {isEditable && (
+                        {isEditable && (
+                          <TableCell className='py-1 w-10 pr-2 text-right'>
                             <Button
                               variant='ghost'
                               size='icon'
@@ -297,8 +293,8 @@ export function MealRow({
                             >
                               <X className='h-3.5 w-3.5' />
                             </Button>
-                          )}
-                        </TableCell>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}
