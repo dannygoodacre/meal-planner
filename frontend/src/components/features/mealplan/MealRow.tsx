@@ -154,7 +154,7 @@ export function MealRow({
       {/* EXPANDED INGREDIENT SUB-TABLE */}
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
-          <TableCell colSpan={10} className='py-6 px-12'>
+          <TableCell colSpan={10} className='py-6 px-6'>
             <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
               {/* Fixed: Added table-fixed w-full here */}
               <Table className='table-fixed w-full'>
