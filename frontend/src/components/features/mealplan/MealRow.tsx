@@ -80,12 +80,13 @@ export function MealRow({
         className={`cursor-pointer group transition-colors hover:bg-muted/50 ${isExpanded ? 'border-b-0 bg-muted/30' : ''}`}
         onClick={onToggleExpand}
       >
+        {/* Toggle Icon Column */}
         <TableCell className='w-10'>
           {isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
         </TableCell>
 
-        {/* Fixed: Added truncate to handle long meal names */}
-        <TableCell className='w-[22%] font-medium truncate'>
+        {/* Meal Name Column: Combines Ingredient (29%) + Quantity (7%) */}
+        <TableCell className='w-[36%] font-medium truncate'>
           {isEditable ? (
             <Controller
               control={control}
@@ -111,14 +112,27 @@ export function MealRow({
           )}
         </TableCell>
 
-        {/* 6 Evenly spaced columns (11% each) */}
-        <TableCell className='w-[17%]'>{round(mealMacros.calories, 0)}</TableCell>
-        <TableCell className='w-[11%]'>{round(mealMacros.protein)}</TableCell>
-        <TableCell className='w-[11%]'>{round(mealMacros.carbohydrates)}</TableCell>
-        <TableCell className='w-[11%]'>{round(mealMacros.fat)}</TableCell>
-        <TableCell className='w-[11%]'>{round(mealMacros.fibre)}</TableCell>
-        <TableCell className='w-[11%]'>{round(mealMacros.salt)}</TableCell>
+        {/* 11% Macro Columns */}
+        <TableCell className='text-right w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
+        <TableCell className='text-right w-[11%]'>{round(mealMacros.protein)}</TableCell>
 
+        {/* Carbs Group: 7% + 4% = 11% */}
+        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.carbohydrates)}</TableCell>
+        <TableCell className='text-left w-[4%] pl-0.5'>
+          <span className='text-muted-foreground'>{round(mealMacros.sugar)}</span>
+        </TableCell>
+
+        {/* Fat Group: 7% + 4% = 11% */}
+        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.fat)}</TableCell>
+        <TableCell className='text-left w-[4%] pl-0.5'>
+          <span className='text-muted-foreground'>{round(mealMacros.saturatedFat)}</span>
+        </TableCell>
+
+        {/* 7% Remaining Macro Columns */}
+        <TableCell className='text-right w-[7%]'>{round(mealMacros.fibre)}</TableCell>
+        <TableCell className='text-right w-[7%]'>{round(mealMacros.salt)}</TableCell>
+
+        {/* Fixed Action Button Column */}
         <TableCell className='w-10 pr-4 text-right'>
           {isEditable && (
             <Button
