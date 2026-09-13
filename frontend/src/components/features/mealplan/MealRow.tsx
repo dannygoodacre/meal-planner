@@ -85,7 +85,7 @@ export function MealRow({
         </TableCell>
 
         {/* Fixed: Added truncate to handle long meal names */}
-        <TableCell className='w-[28%] font-medium truncate'>
+        <TableCell className='w-[22%] font-medium truncate'>
           {isEditable ? (
             <Controller
               control={control}
@@ -107,12 +107,12 @@ export function MealRow({
               )}
             />
           ) : (
-            mealName || <span className='italic text-muted-foreground'>Unnamed Meal</span>
+            mealName
           )}
         </TableCell>
 
         {/* 6 Evenly spaced columns (11% each) */}
-        <TableCell className='w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
+        <TableCell className='w-[17%]'>{round(mealMacros.calories, 0)}</TableCell>
         <TableCell className='w-[11%]'>{round(mealMacros.protein)}</TableCell>
         <TableCell className='w-[11%]'>{round(mealMacros.carbohydrates)}</TableCell>
         <TableCell className='w-[11%]'>{round(mealMacros.fat)}</TableCell>
