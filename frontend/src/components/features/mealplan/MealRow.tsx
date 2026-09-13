@@ -240,18 +240,17 @@ export function MealRow({
                                   <NumberInput
                                     value={field.value}
                                     onChange={field.onChange}
-                                    className='h-7 px-1.5 py-0 text-xs flex-1 min-w-0'
+                                    className='h-7 w-12 px-1 py-0 text-xs text-center shrink-0 min-w-0'
                                   />
                                 )}
                               />
-                              <span className='text-xs shrink-0 whitespace-nowrap'>
+                              <span className='text-xs shrink-0 whitespace-nowrap text-muted-foreground'>
                                 {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
                               </span>
                             </div>
                           ) : (
-                            <div className='flex items-center h-7 py-2'>
-                              {quantity}
-                              {currentIng.food?.unit === 'Grams' ? ' g' : ' pcs'}
+                            <div className='flex items-center h-7 py-2 text-xs'>
+                              {quantity} {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
                             </div>
                           )}
                         </TableCell>
