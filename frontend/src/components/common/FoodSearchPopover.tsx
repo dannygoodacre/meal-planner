@@ -96,7 +96,7 @@ export default function FoodSearchPopover({
       <PopoverContent
         align='start'
         sideOffset={5}
-        className='w-(--radix-popover-trigger-width) overflow-hidden rounded-md border p-0 shadow-lg'
+        className='w-[50vw] min-w-50 overflow-hidden rounded-md border p-0 shadow-lg'
         onOpenAutoFocus={e => e.preventDefault()}
         onInteractOutside={e => {
           if (keepOpenUntilSelection) {

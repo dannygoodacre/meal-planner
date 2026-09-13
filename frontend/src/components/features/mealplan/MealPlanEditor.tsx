@@ -148,28 +148,31 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
         <Table className='table-fixed w-full'>
           <TableHeader className='bg-muted/50'>
             <TableRow>
-              <TableHead className='w-[3%]' />
+              <TableHead className='w-[6%]' />
 
-              {/* Updated to 36% */}
-              <TableHead className='text-xs w-[36%]'>Meal</TableHead>
+              <TableHead className='text-xs w-[30%]'>Meal</TableHead>
 
               <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
+
               <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
 
               <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
+
               <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                 <span className='text-muted-foreground'>(Sugars)</span>
               </TableHead>
 
               <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
+
               <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                 <span className='text-muted-foreground'>(Sat)</span>
               </TableHead>
 
               <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
+
               <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
 
-              <TableHead className='w-[3%]' />
+              <TableHead className='w-[6%]' />
             </TableRow>
           </TableHeader>
 

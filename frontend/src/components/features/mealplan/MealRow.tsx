@@ -144,36 +144,12 @@ export function MealRow({
         </TableCell>
       </TableRow>
 
-      {/* EXPANDED INGREDIENT SUB-TABLE */}
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
           <TableCell colSpan={11} className='pt-0 pb-6 px-0'>
             {/*<div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>*/}
             <div className='border-y bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
-              {/* Fixed: Added table-fixed w-full here */}
               <Table className='table-fixed w-full'>
-                {/*<TableHeader className='bg-muted/50'>*/}
-                {/*  <TableRow>*/}
-                {/*    <TableHead className='w-[3%]' />*/}
-
-                {/*    <TableHead className='text-xs w-[26%]' />*/}
-                {/*    <TableHead className='text-xs w-[10%]' />*/}
-
-                {/*    <TableHead className='text-xs text-right w-[11%]' />*/}
-                {/*    <TableHead className='text-xs text-right w-[11%]' />*/}
-
-                {/*    <TableHead className='text-xs text-right w-[7%] pr-0.5' />*/}
-                {/*    <TableHead className='text-xs text-left w-[4%] pl-0.5' />*/}
-
-                {/*    <TableHead className='text-xs text-right w-[7%] pr-0.5' />*/}
-                {/*    <TableHead className='text-xs text-left w-[4%] pl-0.5' />*/}
-
-                {/*    <TableHead className='text-xs text-right w-[7%]' />*/}
-                {/*    <TableHead className='text-xs text-right w-[7%]' />*/}
-
-                {/*    <TableHead className='w-[3%]' />*/}
-                {/*  </TableRow>*/}
-                {/*</TableHeader>*/}
                 <TableBody>
                   {ingredients.length === 0 && (
                     <TableRow>
@@ -198,9 +174,9 @@ export function MealRow({
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
-                        <TableCell className='w-[4%]' />
+                        <TableCell className='w-[6%]' />
 
-                        <TableCell className='py-2 font-medium w-[29%] truncate'>
+                        <TableCell className='py-2 font-medium w-[24%]'>
                           {isEditable ? (
                             <FoodSearchPopover
                               foodName={currentIng.food?.name || ''}
@@ -226,7 +202,7 @@ export function MealRow({
                               }}
                             />
                           ) : (
-                            currentIng.food?.name || ''
+                            <span className='truncate block'>{currentIng.food?.name || ''}</span>
                           )}
                         </TableCell>
 
@@ -273,7 +249,7 @@ export function MealRow({
                         <TableCell className='py-2 text-right w-[7%]'>{round(liveFibre)}</TableCell>
                         <TableCell className='py-2 text-right w-[7%]'>{round(liveSalt, 2)}</TableCell>
 
-                        <TableCell className='py-1 w-[3%] pr-4 text-right'>
+                        <TableCell className='py-1 w-[6%] pr-4 text-right'>
                           {isEditable && (
                             <Button
                               variant='ghost'
