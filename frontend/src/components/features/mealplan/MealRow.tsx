@@ -75,6 +75,7 @@ export function MealRow({
 
   return (
     <Fragment>
+      {/* PARENT MEAL ROW */}
       <TableRow
         className={`cursor-pointer group transition-colors hover:bg-muted/50 ${isExpanded ? 'border-b-0 bg-muted/30' : ''}`}
         onClick={onToggleExpand}
@@ -83,7 +84,8 @@ export function MealRow({
           {isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
         </TableCell>
 
-        <TableCell className='font-medium'>
+        {/* Fixed: Added truncate to handle long meal names */}
+        <TableCell className='w-[28%] font-medium truncate'>
           {isEditable ? (
             <Controller
               control={control}
@@ -94,14 +96,11 @@ export function MealRow({
                   onSearchChange={field.onChange}
                   onSelect={selectedMeal => {
                     field.onChange(selectedMeal.name);
-
                     const copiedIngredients = (selectedMeal.ingredients || []).map(ing => ({
                       quantity: ing.quantity,
                       food: ing.food
                     }));
-
                     replace(copiedIngredients);
-
                     onForceExpand();
                   }}
                 />
@@ -112,12 +111,13 @@ export function MealRow({
           )}
         </TableCell>
 
-        <TableCell>{round(mealMacros.calories, 0)}</TableCell>
-        <TableCell>{round(mealMacros.protein)}</TableCell>
-        <TableCell>{round(mealMacros.carbohydrates)}</TableCell>
-        <TableCell>{round(mealMacros.fat)}</TableCell>
-        <TableCell>{round(mealMacros.fibre)}</TableCell>
-        <TableCell>{round(mealMacros.salt)}</TableCell>
+        {/* 6 Evenly spaced columns (11% each) */}
+        <TableCell className='w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
+        <TableCell className='w-[11%]'>{round(mealMacros.protein)}</TableCell>
+        <TableCell className='w-[11%]'>{round(mealMacros.carbohydrates)}</TableCell>
+        <TableCell className='w-[11%]'>{round(mealMacros.fat)}</TableCell>
+        <TableCell className='w-[11%]'>{round(mealMacros.fibre)}</TableCell>
+        <TableCell className='w-[11%]'>{round(mealMacros.salt)}</TableCell>
 
         <TableCell className='w-10 pr-4 text-right'>
           {isEditable && (
@@ -137,27 +137,39 @@ export function MealRow({
         </TableCell>
       </TableRow>
 
+      {/* EXPANDED INGREDIENT SUB-TABLE */}
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
           <TableCell colSpan={10} className='py-6 px-12'>
             <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
-              <Table>
+              {/* Fixed: Added table-fixed w-full here */}
+              <Table className='table-fixed w-full'>
                 <TableHeader className='bg-muted/50'>
                   <TableRow>
-                    <TableHead className='text-xs'>Ingredient</TableHead>
-                    <TableHead className='text-xs w-36 min-w-36'>Quantity</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Cals</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Protein</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Carbs</TableHead>
-                    <TableHead className='text-xs text-left w-20'>
+                    {/* Left section: 30% total (23% Ingredient + 7% Quantity) */}
+                    <TableHead className='text-xs w-[29%]'>Ingredient</TableHead>
+                    <TableHead className='text-xs w-[7%] min-w-20'>Quantity</TableHead>
+
+                    {/* 6 Equal Macro Groups: 11% each (66% total) */}
+                    <TableHead className='text-xs text-right w-[11%]'>Cals</TableHead>
+                    <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
+
+                    {/* Carbs Group: 7% + 4% = 11% */}
+                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
+                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                       <span className='text-muted-foreground'>(Sugars)</span>
                     </TableHead>
-                    <TableHead className='text-xs text-right w-20'>Fat</TableHead>
-                    <TableHead className='text-xs text-left w-20'>
-                      <span className='text-muted-foreground'>(Sats)</span>
+
+                    {/* Fat Group: 7% + 4% = 11% */}
+                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
+                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
+                      <span className='text-muted-foreground'>(Sat)</span>
                     </TableHead>
-                    <TableHead className='text-xs text-right w-20'>Fibre</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Salt</TableHead>
+
+                    <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
+                    <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
+
+                    {/* Remaining ~4% space allocated to the fixed-width action column */}
                     <TableHead className='w-10' />
                   </TableRow>
                 </TableHeader>
@@ -185,7 +197,8 @@ export function MealRow({
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
-                        <TableCell className='py-2 font-medium'>
+                        {/* Fixed: Added truncate so long food names never expand column width */}
+                        <TableCell className='py-2 font-medium w-[18%] truncate'>
                           {isEditable ? (
                             <FoodSearchPopover
                               foodName={currentIng.food?.name || ''}
@@ -215,7 +228,7 @@ export function MealRow({
                           )}
                         </TableCell>
 
-                        <TableCell className='py-1 w-36 min-w-36'>
+                        <TableCell className='py-1 w-[30%]'>
                           {isEditable ? (
                             <div className='flex items-center gap-1.5 w-full'>
                               <Controller
@@ -229,31 +242,35 @@ export function MealRow({
                                   />
                                 )}
                               />
-
                               <span className='text-xs shrink-0 whitespace-nowrap'>
                                 {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
                               </span>
                             </div>
                           ) : (
-                            <div className='flex items-center h-7 py-2 w-20'>
+                            <div className='flex items-center h-7 py-2'>
                               {quantity}
                               {currentIng.food?.unit === 'Grams' ? ' g' : ' pcs'}
                             </div>
                           )}
                         </TableCell>
 
-                        <TableCell className='py-2 text-right w-20'>{round(liveCals)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveProtein)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveCarbs)}</TableCell>
-                        <TableCell className='py-2 text-left w-20'>
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveCals)}</TableCell>
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveProtein)}</TableCell>
+
+                        {/* Carbs + Sugars split */}
+                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveCarbs)}</TableCell>
+                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
                           <span className='text-muted-foreground'>{round(liveSugars)}</span>
                         </TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveFat)}</TableCell>
-                        <TableCell className='py-2 text-left w-20'>
+
+                        {/* Fat + Sats split */}
+                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveFat)}</TableCell>
+                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
                           <span className='text-muted-foreground'>{round(liveSats)}</span>
                         </TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveFibre)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveSalt, 2)}</TableCell>
+
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveSalt, 2)}</TableCell>
 
                         <TableCell className='py-1 w-10 pr-2 text-right'>
                           {isEditable && (
