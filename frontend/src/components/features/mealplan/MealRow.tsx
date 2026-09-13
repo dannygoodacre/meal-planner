@@ -198,9 +198,9 @@ export function MealRow({
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
-                        <TableCell className='w-[3%]' />
+                        <TableCell className='w-[4%]' />
 
-                        <TableCell className='py-2 font-medium w-[26%] truncate'>
+                        <TableCell className='py-2 font-medium w-[29%] truncate'>
                           {isEditable ? (
                             <FoodSearchPopover
                               foodName={currentIng.food?.name || ''}
@@ -230,7 +230,7 @@ export function MealRow({
                           )}
                         </TableCell>
 
-                        <TableCell className='py-1 w-[10%]'>
+                        <TableCell className='py-1 w-[6%]'>
                           {isEditable ? (
                             <div className='flex items-center gap-1.5 w-full'>
                               <Controller
