@@ -145,37 +145,31 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
           </div>
         </div>
 
-        <Table>
+        <Table className='table-fixed w-full'>
           <TableHeader className='bg-muted/50'>
             <TableRow>
-              {/* Toggle Button Space */}
-              <TableHead className='w-10' />
+              <TableHead className='w-[3%]' />
 
-              {/* Combines Ingredient (29%) + Quantity (7%) */}
+              {/* Updated to 36% */}
               <TableHead className='text-xs w-[36%]'>Meal</TableHead>
 
-              {/* 11% Macro Headers */}
               <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
               <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
 
-              {/* Carbs Group: 7% + 4% = 11% */}
               <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
               <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                 <span className='text-muted-foreground'>(Sugars)</span>
               </TableHead>
 
-              {/* Fat Group: 7% + 4% = 11% */}
               <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
               <TableHead className='text-xs text-left w-[4%] pl-0.5'>
                 <span className='text-muted-foreground'>(Sat)</span>
               </TableHead>
 
-              {/* 7% Remaining Macro Headers */}
               <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
               <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
 
-              {/* Delete Button Space */}
-              <TableHead className='w-10' />
+              <TableHead className='w-[3%]' />
             </TableRow>
           </TableHeader>
 

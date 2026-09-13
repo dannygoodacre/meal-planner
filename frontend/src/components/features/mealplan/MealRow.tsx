@@ -6,7 +6,7 @@ import FoodSearchPopover from '@/components/common/FoodSearchPopover';
 import MealSearchPopover from '@/components/common/MealSearchPopover';
 import NumberInput from '@/components/common/NumberInput';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { calculateMealMacros, round, scaleMacro } from '@/utils';
 
 import type { MealPlan } from '@/types';
@@ -80,12 +80,10 @@ export function MealRow({
         className={`cursor-pointer group transition-colors hover:bg-muted/50 ${isExpanded ? 'border-b-0 bg-muted/30' : ''}`}
         onClick={onToggleExpand}
       >
-        {/* Toggle Icon Column */}
-        <TableCell className='w-10'>
+        <TableCell className='w-[3%]'>
           {isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
         </TableCell>
 
-        {/* Meal Name Column: Combines Ingredient (29%) + Quantity (7%) */}
         <TableCell className='w-[36%] font-medium truncate'>
           {isEditable ? (
             <Controller
@@ -112,28 +110,23 @@ export function MealRow({
           )}
         </TableCell>
 
-        {/* 11% Macro Columns */}
         <TableCell className='text-right w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
         <TableCell className='text-right w-[11%]'>{round(mealMacros.protein)}</TableCell>
 
-        {/* Carbs Group: 7% + 4% = 11% */}
         <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.carbohydrates)}</TableCell>
         <TableCell className='text-left w-[4%] pl-0.5'>
           <span className='text-muted-foreground'>{round(mealMacros.sugar)}</span>
         </TableCell>
 
-        {/* Fat Group: 7% + 4% = 11% */}
         <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.fat)}</TableCell>
         <TableCell className='text-left w-[4%] pl-0.5'>
           <span className='text-muted-foreground'>{round(mealMacros.saturatedFat)}</span>
         </TableCell>
 
-        {/* 7% Remaining Macro Columns */}
         <TableCell className='text-right w-[7%]'>{round(mealMacros.fibre)}</TableCell>
         <TableCell className='text-right w-[7%]'>{round(mealMacros.salt)}</TableCell>
 
-        {/* Fixed Action Button Column */}
-        <TableCell className='w-10 pr-4 text-right'>
+        <TableCell className='w-[3%] pr-4 text-right'>
           {isEditable && (
             <Button
               variant='ghost'
@@ -154,35 +147,33 @@ export function MealRow({
       {/* EXPANDED INGREDIENT SUB-TABLE */}
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
-          <TableCell colSpan={11} className='py-6'>
-            <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
+          <TableCell colSpan={11} className='pt-0 pb-6 px-0'>
+            {/*<div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>*/}
+            <div className='border-y bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
               {/* Fixed: Added table-fixed w-full here */}
-              <Table className='table-fixed'>
-                <TableHeader className='bg-muted/50'>
-                  <TableRow>
-                    <TableHead className='text-xs w-[29%]'>Ingredient</TableHead>
-                    <TableHead className='text-xs w-[7%]'>Quantity</TableHead>
+              <Table className='table-fixed w-full'>
+                {/*<TableHeader className='bg-muted/50'>*/}
+                {/*  <TableRow>*/}
+                {/*    <TableHead className='w-[3%]' />*/}
 
-                    <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
-                    <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
+                {/*    <TableHead className='text-xs w-[26%]' />*/}
+                {/*    <TableHead className='text-xs w-[10%]' />*/}
 
-                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
-                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
-                      <span className='text-muted-foreground'>(Sugars)</span>
-                    </TableHead>
+                {/*    <TableHead className='text-xs text-right w-[11%]' />*/}
+                {/*    <TableHead className='text-xs text-right w-[11%]' />*/}
 
-                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
-                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
-                      <span className='text-muted-foreground'>(Sat)</span>
-                    </TableHead>
+                {/*    <TableHead className='text-xs text-right w-[7%] pr-0.5' />*/}
+                {/*    <TableHead className='text-xs text-left w-[4%] pl-0.5' />*/}
 
-                    <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
-                    <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
+                {/*    <TableHead className='text-xs text-right w-[7%] pr-0.5' />*/}
+                {/*    <TableHead className='text-xs text-left w-[4%] pl-0.5' />*/}
 
-                    {!isEditable && <TableHead className='w-[1%]' />}
-                    {isEditable && <TableHead className='w-10' />}
-                  </TableRow>
-                </TableHeader>
+                {/*    <TableHead className='text-xs text-right w-[7%]' />*/}
+                {/*    <TableHead className='text-xs text-right w-[7%]' />*/}
+
+                {/*    <TableHead className='w-[3%]' />*/}
+                {/*  </TableRow>*/}
+                {/*</TableHeader>*/}
                 <TableBody>
                   {ingredients.length === 0 && (
                     <TableRow>
@@ -207,8 +198,9 @@ export function MealRow({
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
-                        {/* Fixed: Added truncate so long food names never expand column width */}
-                        <TableCell className='py-2 font-medium w-[18%] truncate'>
+                        <TableCell className='w-[3%]' />
+
+                        <TableCell className='py-2 font-medium w-[26%] truncate'>
                           {isEditable ? (
                             <FoodSearchPopover
                               foodName={currentIng.food?.name || ''}
@@ -238,7 +230,7 @@ export function MealRow({
                           )}
                         </TableCell>
 
-                        <TableCell className='py-1 w-[36%]'>
+                        <TableCell className='py-1 w-[10%]'>
                           {isEditable ? (
                             <div className='flex items-center gap-1.5 w-full'>
                               <Controller
@@ -279,11 +271,11 @@ export function MealRow({
                           <span className='text-muted-foreground'>{round(liveSats)}</span>
                         </TableCell>
 
-                        <TableCell className='py-2 text-right w-[11%]'>{round(liveFibre)}</TableCell>
-                        <TableCell className='py-2 text-right w-[11%]'>{round(liveSalt, 2)}</TableCell>
+                        <TableCell className='py-2 text-right w-[7%]'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-[7%]'>{round(liveSalt, 2)}</TableCell>
 
-                        {isEditable && (
-                          <TableCell className='py-1 w-10 pr-2 text-right'>
+                        <TableCell className='py-1 w-[3%] pr-4 text-right'>
+                          {isEditable && (
                             <Button
                               variant='ghost'
                               size='icon'
@@ -293,8 +285,8 @@ export function MealRow({
                             >
                               <X className='h-3.5 w-3.5' />
                             </Button>
-                          </TableCell>
-                        )}
+                          )}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
