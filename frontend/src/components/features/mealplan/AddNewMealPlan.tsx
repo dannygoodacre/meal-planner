@@ -68,7 +68,6 @@ export default function AddNewMealPlan() {
       name: formData.name,
       meals: formData.meals.map(meal => ({
         name: meal.name,
-        mealId: null,
         ingredients: meal.ingredients.map(ingredient => ({
           foodId: ingredient.food.id,
           quantity: ingredient.quantity

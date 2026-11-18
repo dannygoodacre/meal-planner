@@ -5,6 +5,11 @@ namespace MealPlanner.Application.Abstractions.Repositories;
 public interface IFoodRepository : IPublicEntityRepository<Food>
 {
     /// <summary>
+    /// Whether any meal or meal plan ingredient uses the food.
+    /// </summary>
+    Task<bool> IsInUseAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Fetch a mapping of public IDs to internal database IDs.
     /// </summary>
     /// <param name="ids">The public IDs of the Food entities.</param>

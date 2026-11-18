@@ -61,7 +61,6 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
       meals: formData.meals.map(meal => ({
         name: meal.name,
         id: meal.id.startsWith('temp-') ? null : meal.id,
-        templateMealId: null,
         ingredients: meal.ingredients.map(ingredient => ({
           foodId: ingredient.food.id,
           quantity: ingredient.quantity

@@ -74,8 +74,7 @@ export const MealSchema = MealFormSchema.extend({
 });
 
 export const AddMealPlanMealDtoSchema = z.object({
-  name: z.string().min(1).nullable(),
-  mealId: z.guid().nullable(),
+  name: requiredString,
   ingredients: z.array(IngredientDtoSchema).default([])
 });
 
@@ -92,7 +91,6 @@ export const MealPlanSchema = z.object({
 
 export const UpdateMealPlanMealRequestSchema = z.object({
   id: z.guid().nullable(),
-  templateMealId: z.guid().nullable(),
   name: requiredString,
   ingredients: z.array(IngredientDtoSchema)
 });

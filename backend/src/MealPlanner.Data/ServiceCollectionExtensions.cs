@@ -1,4 +1,4 @@
-using DannyGoodacre.Cqrs;
+using DannyGoodacre.Cqrs.EntityFrameworkCore;
 using MealPlanner.Application.Abstractions.Repositories;
 using MealPlanner.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +17,13 @@ public static class ServiceCollectionExtensions
 
             services.AddDbContext<ApplicationContext>(options =>
             {
-                options.UseNpgsql(connectionString);
+                // Single query: the includes are a nested chain (no sibling collections), so there is no cartesian explosion to split.
+                options.UseNpgsql(connectionString, npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery));
 
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
-            services.AddScoped<IStateUnit>(x => x.GetRequiredService<ApplicationContext>());
+            services.AddEntityFrameworkUnits<ApplicationContext>();
 
             services.AddScoped<IFoodRepository, FoodRepository>();
 

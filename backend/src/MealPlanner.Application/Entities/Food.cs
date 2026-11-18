@@ -8,7 +8,7 @@ public sealed class Food : PublicEntity, IUniqueRegistryItem
 
     public required int ReferenceQuantity { get; set; }
 
-    public required decimal Calories { get; set; }
+    public required int Calories { get; set; }
 
     public required decimal Protein { get; set; }
 

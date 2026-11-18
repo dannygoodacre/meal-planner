@@ -14,6 +14,10 @@ internal sealed class FoodRepository(ApplicationContext context) : IFoodReposito
         => context.Foods
             .AnyAsync(x => x.NormalizedName == name.ToNormalizedString(), cancellationToken);
 
+    public Task<bool> ExistsByNameAsync(string name, Guid excludeId, CancellationToken cancellationToken = default)
+        => context.Foods
+            .AnyAsync(x => x.NormalizedName == name.ToNormalizedString() && x.PublicId != excludeId, cancellationToken);
+
     public void Remove(Food food)
         => context.Remove(food);
 
@@ -21,21 +25,14 @@ internal sealed class FoodRepository(ApplicationContext context) : IFoodReposito
         => context.Foods
             .SingleOrDefaultAsync(x => x.PublicId == id, cancellationToken);
 
-    public Task<int> GetCountAsync(CancellationToken cancellationToken)
-        => context.Foods
-            .CountAsync(cancellationToken);
+    public async Task<bool> IsInUseAsync(Guid id, CancellationToken cancellationToken = default)
+        => await context.Set<Ingredient>().AnyAsync(x => x.Food.PublicId == id, cancellationToken)
+           || await context.Set<MealPlanIngredient>().AnyAsync(x => x.Food.PublicId == id, cancellationToken);
 
     public Task<Dictionary<Guid, int>> GetIdMappingAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
         => context.Foods
             .Where(x => ids.Contains(x.PublicId))
             .ToDictionaryAsync(x => x.PublicId, x => x.Id, cancellationToken);
-
-    public Task<List<Food>> GetPaginatedAsync(int page, int limit, CancellationToken cancellationToken = default)
-        => context.Foods
-            .OrderBy(x => x.Name)
-            .Skip(page * limit)
-            .Take(limit)
-            .ToListAsync(cancellationToken);
 
     public Task<Food?> GetWithTrackingAsync(Guid id, CancellationToken cancellationToken = default)
         => context.Foods

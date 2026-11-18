@@ -1,6 +1,6 @@
-using DannyGoodacre.Primitives;
+using DannyGoodacre.Results;
 using Microsoft.AspNetCore.Mvc;
-using IResult = DannyGoodacre.Primitives.IResult;
+using IResult = DannyGoodacre.Results.IResult;
 
 namespace MealPlanner.Web;
 

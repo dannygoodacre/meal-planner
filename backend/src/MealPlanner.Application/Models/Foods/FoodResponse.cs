@@ -14,7 +14,7 @@ public sealed record FoodResponse
 
     public required int ReferenceQuantity { get; init; }
 
-    public required decimal Calories { get; init; }
+    public required int Calories { get; init; }
 
     public required decimal Protein { get; init; }
 

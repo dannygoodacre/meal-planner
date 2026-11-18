@@ -1,5 +1,5 @@
 using System.Globalization;
-using DannyGoodacre.Primitives;
+using DannyGoodacre.Results;
 
 namespace MealPlanner.Application;
 
@@ -73,16 +73,10 @@ internal static class ValidationStateExtensions
         }
 
         public bool IsNotNullEmptyOrWhitespace(string? value, string name)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return true;
-            }
-
-            validationState.AddError(name, "Must not be null, empty, or whitespace.");
-
-            return false;
-        }
+            => !validationState.AddErrorIf(
+                string.IsNullOrWhiteSpace(value),
+                name,
+                "Must not be null or empty.");
 
         public bool IsNull(object? value, string name)
         {

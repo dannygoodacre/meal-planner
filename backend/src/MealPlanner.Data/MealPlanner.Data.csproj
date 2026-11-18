@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DannyGoodacre.Cqrs" Version="0.13.0" />
+      <PackageReference Include="DannyGoodacre.Cqrs" Version="1.0.0-alpha.2" />
+      <PackageReference Include="DannyGoodacre.Cqrs.EntityFrameworkCore" Version="1.0.0-alpha.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
         <PrivateAssets>all</PrivateAssets>
@@ -15,12 +16,6 @@
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="DannyGoodacre.Cqrs">
-        <HintPath>..\..\..\.nuget\packages\dannygoodacre.cqrs\0.7.0\lib\net10.0\DannyGoodacre.Cqrs.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
     <ItemGroup>

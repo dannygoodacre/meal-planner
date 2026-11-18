@@ -1,4 +1,4 @@
-using DannyGoodacre.Primitives;
+using DannyGoodacre.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 

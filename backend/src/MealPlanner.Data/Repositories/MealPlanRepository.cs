@@ -14,44 +14,26 @@ internal sealed class MealPlanRepository(ApplicationContext context) : IMealPlan
         => context.MealPlans
             .AnyAsync(x => x.NormalizedName == name.ToNormalizedString(), cancellationToken);
 
+    public Task<bool> ExistsByNameAsync(string name, Guid excludeId, CancellationToken cancellationToken = default)
+        => context.MealPlans
+            .AnyAsync(x => x.NormalizedName == name.ToNormalizedString() && x.PublicId != excludeId, cancellationToken);
+
     public void Remove(MealPlan mealPlan)
         => context.MealPlans.Remove(mealPlan);
 
     public Task<MealPlan?> GetAsync(Guid id, CancellationToken cancellationToken = default)
-        => context.MealPlans
-            .Include(x => x.Meals)
-            .ThenInclude(x => x.Ingredients)
-            .ThenInclude(x => x.Food)
+        => Query()
             .SingleOrDefaultAsync(x => x.PublicId == id, cancellationToken);
 
-    public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
-        => context.MealPlans
-            .CountAsync(cancellationToken);
-
-    public Task<List<MealPlan>> GetPaginatedAsync(int page, int limit, CancellationToken cancellationToken = default)
-        => context.MealPlans
-            .OrderBy(x => x.Name)
-            .Include(x => x.Meals)
-            .ThenInclude(x => x.Ingredients)
-            .ThenInclude(x => x.Food)
-            .Skip(page * limit)
-            .Take(limit)
-            .ToListAsync(cancellationToken);
-
     public Task<MealPlan?> GetWithTrackingAsync(Guid id, CancellationToken cancellationToken = default)
-        => context.MealPlans
-            .AsTracking()
-            .Include(x => x.Meals)
-            .ThenInclude(x => x.Ingredients)
-            .ThenInclude(x => x.Food)
-            .AsSplitQuery()
+        => Query(tracking: true)
             .SingleOrDefaultAsync(x => x.PublicId == id, cancellationToken);
 
     public Task<List<MealPlan>> SearchByNameAsync(string searchTerm, CancellationToken cancellationToken = default)
     {
         string normalizedTerm = searchTerm.ToNormalizedString();
 
-        return context.MealPlans
+        return Query()
             .Where(x =>
                 x.NormalizedName.Contains(normalizedTerm)
                 || EF.Functions.TrigramsSimilarity(x.NormalizedName, normalizedTerm) > 0.2)
@@ -60,9 +42,15 @@ internal sealed class MealPlanRepository(ApplicationContext context) : IMealPlan
                     ? 1.0
                     : EF.Functions.TrigramsSimilarity(x.NormalizedName, normalizedTerm))
             .Take(10)
-            .Include(x => x.Meals)
-            .ThenInclude(x => x.Ingredients)
-            .ThenInclude(x => x.Food)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// The full aggregate graph, shared by every read so the includes can't drift apart.
+    /// </summary>
+    private IQueryable<MealPlan> Query(bool tracking = false)
+        => (tracking ? context.MealPlans.AsTracking() : context.MealPlans)
+            .Include(x => x.Meals)
+            .ThenInclude(x => x.Ingredients)
+            .ThenInclude(x => x.Food);
 }

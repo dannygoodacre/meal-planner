@@ -1,4 +1,3 @@
-using DannyGoodacre.Cqrs;
 using MealPlanner.Application.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MealPlanner.Data;
 
-public class ApplicationContext(DbContextOptions<ApplicationContext> options) : DbContext(options), IStateUnit
+public class ApplicationContext(DbContextOptions<ApplicationContext> options) : DbContext(options)
 {
     public DbSet<Food> Foods { get; set; }
 
@@ -87,7 +86,7 @@ public class ApplicationContext(DbContextOptions<ApplicationContext> options) : 
             entity.HasOne(x => x.MealPlan)
                 .WithMany(x => x.Meals)
                 .HasForeignKey(x => x.MealPlanId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -17,7 +17,7 @@ namespace MealPlanner.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
@@ -31,8 +31,8 @@ namespace MealPlanner.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Calories")
-                        .HasColumnType("numeric");
+                    b.Property<int>("Calories")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Carbohydrates")
                         .HasColumnType("numeric");
@@ -278,7 +278,7 @@ namespace MealPlanner.Data.Migrations
                     b.HasOne("MealPlanner.Application.Entities.MealPlan", "MealPlan")
                         .WithMany("Meals")
                         .HasForeignKey("MealPlanId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MealPlan");
