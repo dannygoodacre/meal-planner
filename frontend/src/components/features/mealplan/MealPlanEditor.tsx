@@ -144,17 +144,34 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
           </div>
         </div>
 
-        <Table>
-          <TableHeader>
+        <Table className='table-fixed w-full'>
+          <TableHeader className='bg-muted/50'>
             <TableRow>
-              <TableHead className='w-10' />
-              <TableHead>Meal</TableHead>
-              <TableHead>Calories (kcal)</TableHead>
-              <TableHead>Protein (g)</TableHead>
-              <TableHead>Carbs (g)</TableHead>
-              <TableHead>Fat (g)</TableHead>
-              <TableHead>Fibre (g)</TableHead>
-              <TableHead className='w-10' />
+              <TableHead className='w-[6%]' />
+
+              <TableHead className='text-xs w-[30%]'>Meal</TableHead>
+
+              <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
+
+              <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
+
+              <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
+
+              <TableHead className='text-xs text-left w-[4%] pl-0.5'>
+                <span className='text-muted-foreground'>(Sugars)</span>
+              </TableHead>
+
+              <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
+
+              <TableHead className='text-xs text-left w-[4%] pl-0.5'>
+                <span className='text-muted-foreground'>(Sat)</span>
+              </TableHead>
+
+              <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
+
+              <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
+
+              <TableHead className='w-[6%]' />
             </TableRow>
           </TableHeader>
 

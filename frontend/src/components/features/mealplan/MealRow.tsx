@@ -6,7 +6,7 @@ import FoodSearchPopover from '@/components/common/FoodSearchPopover';
 import MealSearchPopover from '@/components/common/MealSearchPopover';
 import NumberInput from '@/components/common/NumberInput';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { calculateMealMacros, round, scaleMacro } from '@/utils';
 
 import type { MealPlan } from '@/types';
@@ -75,15 +75,16 @@ export function MealRow({
 
   return (
     <Fragment>
+      {/* PARENT MEAL ROW */}
       <TableRow
         className={`cursor-pointer group transition-colors hover:bg-muted/50 ${isExpanded ? 'border-b-0 bg-muted/30' : ''}`}
         onClick={onToggleExpand}
       >
-        <TableCell className='w-10'>
+        <TableCell className='w-[3%]'>
           {isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
         </TableCell>
 
-        <TableCell className='font-medium'>
+        <TableCell className='w-[36%] font-medium truncate'>
           {isEditable ? (
             <Controller
               control={control}
@@ -94,31 +95,38 @@ export function MealRow({
                   onSearchChange={field.onChange}
                   onSelect={selectedMeal => {
                     field.onChange(selectedMeal.name);
-
                     const copiedIngredients = (selectedMeal.ingredients || []).map(ing => ({
                       quantity: ing.quantity,
                       food: ing.food
                     }));
-
                     replace(copiedIngredients);
-
                     onForceExpand();
                   }}
                 />
               )}
             />
           ) : (
-            mealName || <span className='italic text-muted-foreground'>Unnamed Meal</span>
+            mealName
           )}
         </TableCell>
 
-        <TableCell>{round(mealMacros.calories, 0)}</TableCell>
-        <TableCell>{round(mealMacros.protein)}</TableCell>
-        <TableCell>{round(mealMacros.carbohydrates)}</TableCell>
-        <TableCell>{round(mealMacros.fat)}</TableCell>
-        <TableCell>{round(mealMacros.fibre)}</TableCell>
+        <TableCell className='text-right w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
+        <TableCell className='text-right w-[11%]'>{round(mealMacros.protein)}</TableCell>
 
-        <TableCell className='w-10 pr-4 text-right'>
+        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.carbohydrates)}</TableCell>
+        <TableCell className='text-left w-[4%] pl-0.5'>
+          <span className='text-muted-foreground'>{round(mealMacros.sugar)}</span>
+        </TableCell>
+
+        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.fat)}</TableCell>
+        <TableCell className='text-left w-[4%] pl-0.5'>
+          <span className='text-muted-foreground'>{round(mealMacros.saturatedFat)}</span>
+        </TableCell>
+
+        <TableCell className='text-right w-[7%]'>{round(mealMacros.fibre)}</TableCell>
+        <TableCell className='text-right w-[7%]'>{round(mealMacros.salt)}</TableCell>
+
+        <TableCell className='w-[3%] pr-4 text-right'>
           {isEditable && (
             <Button
               variant='ghost'
@@ -138,25 +146,14 @@ export function MealRow({
 
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
-          <TableCell colSpan={8} className='py-6 px-12'>
-            <div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
-              <Table>
-                <TableHeader className='bg-muted/50'>
-                  <TableRow>
-                    <TableHead className='text-xs'>Ingredient</TableHead>
-                    <TableHead className='text-xs w-36 min-w-36'>Quantity</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Cals</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Protein</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Carbs</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Fat</TableHead>
-                    <TableHead className='text-xs text-right w-20'>Fibre</TableHead>
-                    <TableHead className='w-10' />
-                  </TableRow>
-                </TableHeader>
+          <TableCell colSpan={11} className='pt-0 pb-6 px-0'>
+            {/*<div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>*/}
+            <div className='border-y bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
+              <Table className='table-fixed w-full'>
                 <TableBody>
                   {ingredients.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={8} className='text-center py-4 text-xs text-muted-foreground italic'>
+                      <TableCell colSpan={11} className='text-center py-4 text-xs text-muted-foreground italic'>
                         No ingredients added yet.
                       </TableCell>
                     </TableRow>
@@ -169,12 +166,17 @@ export function MealRow({
                     const liveCals = scaleMacro(currentIng.food?.calories || 0, quantity, referenceQuantity);
                     const liveProtein = scaleMacro(currentIng.food?.protein || 0, quantity, referenceQuantity);
                     const liveCarbs = scaleMacro(currentIng.food?.carbohydrates || 0, quantity, referenceQuantity);
+                    const liveSugars = scaleMacro(currentIng.food?.sugar || 0, quantity, referenceQuantity);
                     const liveFat = scaleMacro(currentIng.food?.fat || 0, quantity, referenceQuantity);
+                    const liveSats = scaleMacro(currentIng.food?.saturatedFat || 0, quantity, referenceQuantity);
                     const liveFibre = scaleMacro(currentIng.food?.fibre || 0, quantity, referenceQuantity);
+                    const liveSalt = scaleMacro(currentIng.food?.salt || 0, quantity, referenceQuantity);
 
                     return (
                       <TableRow key={ingField.id} className='h-8 group/ing'>
-                        <TableCell className='py-2 font-medium'>
+                        <TableCell className='w-[6%]' />
+
+                        <TableCell className='py-2 font-medium w-[24%]'>
                           {isEditable ? (
                             <FoodSearchPopover
                               foodName={currentIng.food?.name || ''}
@@ -200,11 +202,11 @@ export function MealRow({
                               }}
                             />
                           ) : (
-                            currentIng.food?.name || ''
+                            <span className='truncate block'>{currentIng.food?.name || ''}</span>
                           )}
                         </TableCell>
 
-                        <TableCell className='py-1 w-36 min-w-36'>
+                        <TableCell className='py-1 w-[6%]'>
                           {isEditable ? (
                             <div className='flex items-center gap-1.5 w-full'>
                               <Controller
@@ -214,30 +216,40 @@ export function MealRow({
                                   <NumberInput
                                     value={field.value}
                                     onChange={field.onChange}
-                                    className='h-7 px-1.5 py-0 text-xs flex-1 min-w-0'
+                                    className='h-7 w-12 px-1 py-0 text-xs text-center shrink-0 min-w-0'
                                   />
                                 )}
                               />
-
-                              <span className='text-xs shrink-0 whitespace-nowrap'>
+                              <span className='text-xs shrink-0 whitespace-nowrap text-muted-foreground'>
                                 {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
                               </span>
                             </div>
                           ) : (
-                            <div className='flex items-center h-7 py-2 w-20'>
-                              {quantity}
-                              {currentIng.food?.unit === 'Grams' ? ' g' : ' pcs'}
+                            <div className='flex items-center h-7 py-2 text-xs'>
+                              {quantity} {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
                             </div>
                           )}
                         </TableCell>
 
-                        <TableCell className='py-2 text-right w-20'>{round(liveCals)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveProtein)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveCarbs)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveFat)}</TableCell>
-                        <TableCell className='py-2 text-right w-20'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveCals)}</TableCell>
+                        <TableCell className='py-2 text-right w-[11%]'>{round(liveProtein)}</TableCell>
 
-                        <TableCell className='py-1 w-10 pr-2 text-right'>
+                        {/* Carbs + Sugars split */}
+                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveCarbs)}</TableCell>
+                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
+                          <span className='text-muted-foreground'>{round(liveSugars)}</span>
+                        </TableCell>
+
+                        {/* Fat + Sats split */}
+                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveFat)}</TableCell>
+                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
+                          <span className='text-muted-foreground'>{round(liveSats)}</span>
+                        </TableCell>
+
+                        <TableCell className='py-2 text-right w-[7%]'>{round(liveFibre)}</TableCell>
+                        <TableCell className='py-2 text-right w-[7%]'>{round(liveSalt, 2)}</TableCell>
+
+                        <TableCell className='py-1 w-[6%] pr-4 text-right'>
                           {isEditable && (
                             <Button
                               variant='ghost'

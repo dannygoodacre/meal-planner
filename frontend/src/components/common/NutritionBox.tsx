@@ -1,4 +1,4 @@
-import { Apple, Beef, Droplet, Flame, Leaf } from 'lucide-react';
+import { Apple, Beef, Droplet, Flame, Leaf, Stone } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/utils';
@@ -36,11 +36,14 @@ export default function NutritionBox({ totals }: NutritionBoxProps) {
   const round = (val: number) => Math.round(val * 10) / 10;
 
   return (
-    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr] gap-4'>
       <div className='flex flex-col gap-4'>
         <NutrientBox label='Calories' total={round(totals.calories)} unit='kcal' icon={Flame} theme='orange' />
 
-        <NutrientBox label='Fibre' total={round(totals.fibre)} unit='g' icon={Leaf} theme='blue' />
+        <div className='grid grid-cols-2 gap-4'>
+          <NutrientBox label='Fibre' total={round(totals.fibre)} unit='g' icon={Leaf} theme='green' />
+          <NutrientBox label='Salt' total={round(totals.salt)} unit='g' decimalPlaces={1} icon={Stone} theme='blue' />
+        </div>
       </div>
 
       <MacroBox
@@ -88,7 +91,7 @@ function NutrientBox({ label, total, unit, decimalPlaces = 0, icon: Icon, theme 
 
   return (
     <Card className={cn(styles.card)}>
-      <CardContent className='y-4 flex items-center gap-2 sm:gap-3 min-w-0 h-full'>
+      <CardContent className='flex items-center gap-2 sm:gap-3 min-w-0 h-full'>
         <div className={cn('p-2 rounded-lg', styles.iconBackground, styles.iconText)}>
           <Icon className='h-5 w-5' />
         </div>
@@ -164,12 +167,12 @@ const themeMap: Record<
     borderDivider: string;
   }
 > = {
-  green: {
-    card: 'bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50',
-    iconBackground: 'bg-green-500/10',
-    iconText: 'text-green-600 dark:text-green-400',
-    badge: 'bg-green-500/10 text-green-700 dark:text-green-400',
-    borderDivider: 'border-green-100/50 dark:border-green-900/30'
+  amber: {
+    card: 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/50',
+    iconBackground: 'bg-amber-500/10',
+    iconText: 'text-amber-600 dark:text-amber-400',
+    badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+    borderDivider: 'border-amber-100/50 dark:border-amber-900/30'
   },
   blue: {
     card: 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/50',
@@ -178,12 +181,12 @@ const themeMap: Record<
     badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
     borderDivider: 'border-blue-100/50 dark:border-blue-900/30'
   },
-  amber: {
-    card: 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/50',
-    iconBackground: 'bg-amber-500/10',
-    iconText: 'text-amber-600 dark:text-amber-400',
-    badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-    borderDivider: 'border-amber-100/50 dark:border-amber-900/30'
+  green: {
+    card: 'bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50',
+    iconBackground: 'bg-green-500/10',
+    iconText: 'text-green-600 dark:text-green-400',
+    badge: 'bg-green-500/10 text-green-700 dark:text-green-400',
+    borderDivider: 'border-green-100/50 dark:border-green-900/30'
   },
   red: {
     card: 'bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50',
