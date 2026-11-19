@@ -11,10 +11,6 @@ export default function useUpdateMealPlan() {
   return useMutation<void, ApiError, { id: string; mealPlan: UpdateMealPlanRequest }>({
     mutationFn: ({ id, mealPlan }) => updateMealPlan(id, mealPlan),
 
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.all }),
-
-    onError: () => {
-      console.log('error occurred');
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.all })
   });
 }

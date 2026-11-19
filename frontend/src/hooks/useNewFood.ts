@@ -11,10 +11,6 @@ export default function useNewFood() {
   return useMutation<string, ApiError, AddFoodRequest>({
     mutationFn: async (food: AddFoodRequest) => await addFood(food),
 
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.food.all }),
-
-    onError: () => {
-      console.log('error occurred');
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.food.all })
   });
 }

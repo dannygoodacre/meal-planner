@@ -8,9 +8,7 @@ import type { UseFormSetError } from 'react-hook-form';
 export function showValidationErrorToast(error: ApiError): void {
   toast.error(
     <div className='flex flex-col gap-2 text-sm max-w-sm'>
-      <span className='font-semibold text-destructive'>
-        {error.message || 'An API error occurred'}
-      </span>
+      <span className='font-semibold text-destructive'>{error.message || 'An API error occurred'}</span>
 
       {error.details?.errors && Object.keys(error.details.errors).length > 0 && (
         <div className='grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 mt-1 text-xs items-start'>

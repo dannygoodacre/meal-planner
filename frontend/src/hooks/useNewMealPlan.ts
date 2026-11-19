@@ -11,10 +11,6 @@ export default function useNewMealPlan() {
   return useMutation<string, ApiError, AddMealPlanRequest>({
     mutationFn: async (mealPlan: AddMealPlanRequest) => await addMealPlan(mealPlan),
 
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.all }),
-
-    onError: () => {
-      console.log('error occurred');
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.all })
   });
 }

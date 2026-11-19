@@ -51,8 +51,6 @@ async function request<TResponse, TBody = unknown>(
   body?: TBody,
   headers?: Record<string, string>
 ): Promise<TResponse> {
-  console.log(`${API_URL}${path}`);
-
   const res = await fetch(`${API_URL}${path}`, {
     method,
     credentials: 'include',
