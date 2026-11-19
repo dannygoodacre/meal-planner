@@ -17,20 +17,20 @@ public sealed record UpdateMealPlanCommand : IStateCommand, IPublicIdRequest, IM
     IReadOnlyCollection<IMealDetails> IMealPlanDetails.Meals => Meals;
 }
 
-internal sealed class UpdateMealPlan(IFoodRepository foodRepository, IMealPlanRepository mealPlanRepository) : ICommandHandler<UpdateMealPlanCommand, Guid>
+internal sealed class UpdateMealPlan(IFoodRepository foodRepository, IMealPlanRepository mealPlanRepository) : ICommandHandler<UpdateMealPlanCommand>
 {
-    public async Task<IResult<Guid>> HandleAsync(UpdateMealPlanCommand command, CancellationToken ct)
+    public async Task<IResult> HandleAsync(UpdateMealPlanCommand command, CancellationToken ct)
     {
         MealPlan? mealPlan = await mealPlanRepository.GetWithTrackingAsync(command.Id, ct);
 
         if (mealPlan is null)
         {
-            return new NotFound<Guid>();
+            return new NotFound();
         }
 
         if (await mealPlanRepository.ExistsByNameAsync(command.Name, command.Id, ct))
         {
-            return new Conflict<Guid>("A meal plan with the same name already exists");
+            return new Conflict("A meal plan with the same name already exists");
         }
 
         List<Guid> foodIds = command.Meals.SelectMany(x => x.Ingredients).Select(x => x.FoodId).Distinct().ToList();
@@ -41,7 +41,7 @@ internal sealed class UpdateMealPlan(IFoodRepository foodRepository, IMealPlanRe
 
         if (missingFoodIds.Count > 0)
         {
-            return new DomainError<Guid>($"The following foods are missing: {string.Join(", ", missingFoodIds)}.");
+            return new DomainError($"The following foods are missing: {string.Join(", ", missingFoodIds)}.");
         }
 
         Dictionary<Guid, MealPlanMeal> unmatchedMeals = mealPlan.Meals.ToDictionary(x => x.PublicId);
@@ -74,7 +74,7 @@ internal sealed class UpdateMealPlan(IFoodRepository foodRepository, IMealPlanRe
 
         if (missingMealIds.Count > 0)
         {
-            return new DomainError<Guid>($"The following meals were not found in the meal plan: {string.Join(", ", missingMealIds)}.");
+            return new DomainError($"The following meals were not found in the meal plan: {string.Join(", ", missingMealIds)}.");
         }
 
         foreach (MealPlanMeal removed in unmatchedMeals.Values)
@@ -84,6 +84,6 @@ internal sealed class UpdateMealPlan(IFoodRepository foodRepository, IMealPlanRe
 
         mealPlan.Name = command.Name;
 
-        return new Success<Guid>(mealPlan.PublicId);
+        return new Success();
     }
 }

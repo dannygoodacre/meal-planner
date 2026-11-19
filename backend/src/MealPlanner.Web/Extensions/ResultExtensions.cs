@@ -1,5 +1,7 @@
 using DannyGoodacre.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using IResult = DannyGoodacre.Results.IResult;
 
 namespace MealPlanner.Web;
@@ -13,13 +15,13 @@ internal static class ResultExtensions
 
             Invalid invalid => new BadRequestObjectResult(invalid.ValidationState.ToValidationProblemDetails()),
 
-            Conflict conflict => new ConflictObjectResult(conflict.Message),
+            Conflict conflict => Problem(StatusCodes.Status409Conflict, conflict.Message),
 
-            DomainError domainError => new UnprocessableEntityObjectResult(domainError.Message),
+            DomainError domainError => Problem(StatusCodes.Status422UnprocessableEntity, domainError.Message),
 
-            NotFound => new NotFoundResult(),
+            NotFound => Problem(StatusCodes.Status404NotFound),
 
-            _ => new StatusCodeResult(500)
+            _ => Problem(StatusCodes.Status500InternalServerError)
         };
 
     public static IActionResult ToHttpResponse<T>(this IResult<T> result)
@@ -29,12 +31,18 @@ internal static class ResultExtensions
 
             Invalid invalid => new BadRequestObjectResult(invalid.ValidationState!.ToValidationProblemDetails()),
 
-            Conflict conflict => new ConflictObjectResult(conflict.Message),
+            Conflict conflict => Problem(StatusCodes.Status409Conflict, conflict.Message),
 
-            DomainError domainError => new UnprocessableEntityObjectResult(domainError.Message),
+            DomainError domainError => Problem(StatusCodes.Status422UnprocessableEntity, domainError.Message),
 
-            NotFound => new NotFoundResult(),
+            NotFound => Problem(StatusCodes.Status404NotFound),
 
-            _ => new StatusCodeResult(500)
+            _ => Problem(StatusCodes.Status500InternalServerError)
+        };
+
+    private static ObjectResult Problem(int status, string? detail = null)
+        => new(new ProblemDetails { Status = status, Title = ReasonPhrases.GetReasonPhrase(status), Detail = detail })
+        {
+            StatusCode = status
         };
 }

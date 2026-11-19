@@ -9,7 +9,7 @@ export function showValidationErrorToast(error: ApiError): void {
   toast.error(
     <div className='flex flex-col gap-2 text-sm max-w-sm'>
       <span className='font-semibold text-destructive'>
-        {error.details?.title || error.message || 'An API error occurred'}
+        {error.message || 'An API error occurred'}
       </span>
 
       {error.details?.errors && Object.keys(error.details.errors).length > 0 && (

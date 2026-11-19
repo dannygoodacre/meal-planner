@@ -10,10 +10,10 @@ using IResult = DannyGoodacre.Results.IResult;
 namespace MealPlanner.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/meal-plans")]
 public sealed class MealPlanController(ICommandHandler<AddMealPlanCommand, Guid> addMealPlan,
                                       IQueryHandler<GetMealPlanQuery, MealPlanResponse> getMealPlan,
-                                      ICommandHandler<UpdateMealPlanCommand, Guid> updateMealPlan,
+                                      ICommandHandler<UpdateMealPlanCommand> updateMealPlan,
                                       ICommandHandler<DeleteMealPlanCommand> deleteMealPlan,
                                       IQueryHandler<SearchMealPlanQuery, SearchResponse<MealPlanResponse>> searchMealPlan) : ControllerBase
 {
@@ -39,7 +39,7 @@ public sealed class MealPlanController(ICommandHandler<AddMealPlanCommand, Guid>
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateMealPlanRequest request, CancellationToken cancellationToken)
     {
-        IResult<Guid> result = await updateMealPlan.HandleAsync(request.ToCommand(id), cancellationToken);
+        IResult result = await updateMealPlan.HandleAsync(request.ToCommand(id), cancellationToken);
 
         return result.ToHttpResponse();
     }
@@ -52,7 +52,7 @@ public sealed class MealPlanController(ICommandHandler<AddMealPlanCommand, Guid>
         return result.ToHttpResponse();
     }
 
-    [HttpGet("search")]
+    [HttpGet]
     public async Task<IActionResult> SearchAsync([FromQuery(Name = "q")] string searchTerm, CancellationToken cancellationToken)
     {
         IResult<SearchResponse<MealPlanResponse>> result = await searchMealPlan.HandleAsync(new SearchMealPlanQuery(searchTerm), cancellationToken);

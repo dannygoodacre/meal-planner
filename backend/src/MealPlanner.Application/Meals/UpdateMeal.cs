@@ -15,20 +15,20 @@ public sealed record UpdateMealCommand : IStateCommand, IPublicIdRequest, IMealD
     public required List<IngredientRequest> Ingredients { get; init; }
 }
 
-internal sealed class UpdateMeal(IFoodRepository foodRepository, IMealRepository mealRepository) : ICommandHandler<UpdateMealCommand, Guid>
+internal sealed class UpdateMeal(IFoodRepository foodRepository, IMealRepository mealRepository) : ICommandHandler<UpdateMealCommand>
 {
-    public async Task<IResult<Guid>> HandleAsync(UpdateMealCommand command, CancellationToken ct)
+    public async Task<IResult> HandleAsync(UpdateMealCommand command, CancellationToken ct)
     {
         Meal? meal = await mealRepository.GetWithTrackingAsync(command.Id, ct);
 
         if (meal is null)
         {
-            return new NotFound<Guid>();
+            return new NotFound();
         }
 
         if (await mealRepository.ExistsByNameAsync(command.Name, command.Id, ct))
         {
-            return new Conflict<Guid>("A meal with the same name already exists");
+            return new Conflict("A meal with the same name already exists");
         }
 
         List<Guid> foodIds = command.Ingredients.Select(x => x.FoodId).ToList();
@@ -39,7 +39,7 @@ internal sealed class UpdateMeal(IFoodRepository foodRepository, IMealRepository
 
         if (missingFoodIds.Count > 0)
         {
-            return new DomainError<Guid>($"The following foods are missing: {string.Join(", ", missingFoodIds)}.");
+            return new DomainError($"The following foods are missing: {string.Join(", ", missingFoodIds)}.");
         }
 
         Dictionary<int, int> incoming = command.Ingredients.ToDictionary(x => foodIdMap[x.FoodId], x => x.Quantity);
@@ -64,6 +64,6 @@ internal sealed class UpdateMeal(IFoodRepository foodRepository, IMealRepository
 
         meal.Name = command.Name;
 
-        return new Success<Guid>(meal.PublicId);
+        return new Success();
     }
 }

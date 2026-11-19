@@ -31,14 +31,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
       try {
         const parsed: unknown = JSON.parse(rawText);
 
-        // Conflict and UnprocessableEntity return a bare JSON string message.
-        if (typeof parsed === 'string') {
-          errorTitle = parsed;
-        } else {
-          problemDetails = parsed as ValidationProblemDetails;
+        problemDetails = parsed as ValidationProblemDetails;
 
-          errorTitle = problemDetails.title || errorTitle;
-        }
+        errorTitle = problemDetails.detail || problemDetails.title || errorTitle;
       } catch {
         errorTitle = rawText;
       }

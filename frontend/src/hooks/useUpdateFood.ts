@@ -8,7 +8,7 @@ import type { AddFoodRequest, ApiError } from '@/types';
 export default function useUpdateFood() {
   const queryClient = useQueryClient();
 
-  return useMutation<string, ApiError, { id: string; food: AddFoodRequest }>({
+  return useMutation<void, ApiError, { id: string; food: AddFoodRequest }>({
     mutationFn: async ({ id, food }) => await updateFood(id, food),
 
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.food.all })

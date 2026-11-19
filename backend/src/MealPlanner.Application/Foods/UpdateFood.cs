@@ -35,20 +35,20 @@ public sealed record UpdateFoodCommand : IStateCommand, IPublicIdRequest, IFoodD
     public required string Source { get; init; }
 }
 
-internal sealed class UpdateFood(IFoodRepository foodRepository) : ICommandHandler<UpdateFoodCommand, Guid>
+internal sealed class UpdateFood(IFoodRepository foodRepository) : ICommandHandler<UpdateFoodCommand>
 {
-    public async Task<IResult<Guid>> HandleAsync(UpdateFoodCommand command, CancellationToken ct)
+    public async Task<IResult> HandleAsync(UpdateFoodCommand command, CancellationToken ct)
     {
         Food? food = await foodRepository.GetWithTrackingAsync(command.Id, ct);
 
         if (food is null)
         {
-            return new NotFound<Guid>();
+            return new NotFound();
         }
 
         if (await foodRepository.ExistsByNameAsync(command.Name, command.Id, ct))
         {
-            return new Conflict<Guid>("A food with the same name already exists");
+            return new Conflict("A food with the same name already exists");
         }
 
         food.Name = command.Name;
@@ -64,6 +64,6 @@ internal sealed class UpdateFood(IFoodRepository foodRepository) : ICommandHandl
         food.Salt = command.Salt;
         food.Source = command.Source;
 
-        return new Success<Guid>(food.PublicId);
+        return new Success();
     }
 }

@@ -112,18 +112,18 @@ def main():
 
     keys = ["unit", "referenceQuantity", "calories", "protein", "carbohydrates", "sugar", "fat", "saturatedFat", "fibre", "salt"]
     food_ids = {
-        name: post("/api/food", {"name": name, **dict(zip(keys, values)), "source": SOURCE})
+        name: post("/api/foods", {"name": name, **dict(zip(keys, values)), "source": SOURCE})
         for name, *values in FOODS
     }
     print(f"Added {len(food_ids)} foods")
 
     for name, items in MEALS.items():
-        post("/api/meal", {"name": name, "ingredients": ingredients(items, food_ids)})
+        post("/api/meals", {"name": name, "ingredients": ingredients(items, food_ids)})
     print(f"Added {len(MEALS)} meals")
 
     for plan_name, entries in MEAL_PLANS.items():
         meals = [(e, MEALS[e]) if isinstance(e, str) else e for e in entries]
-        post("/api/mealplan", {"name": plan_name, "meals": [{"name": n, "ingredients": ingredients(i, food_ids)} for n, i in meals]})
+        post("/api/meal-plans", {"name": plan_name, "meals": [{"name": n, "ingredients": ingredients(i, food_ids)} for n, i in meals]})
     print(f"Added {len(MEAL_PLANS)} meal plans")
 
 

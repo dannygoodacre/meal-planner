@@ -40,6 +40,7 @@ export class ApiError extends Error {
 export interface ValidationProblemDetails {
   type?: string;
   title?: string;
+  detail?: string;
   status?: number;
   traceId?: string;
   errors?: Record<string, string[]>;
