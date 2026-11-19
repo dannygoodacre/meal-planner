@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DannyGoodacre.Testing" Version="1.0.0-alpha.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageReference Include="Respawn" Version="7.0.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.17.0" />
+        <PackageReference Include="xunit.v3.core" Version="4.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit" />
+        <Using Include="DannyGoodacre.Results" />
+        <Using Include="DannyGoodacre.Testing" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MealPlanner.Application\MealPlanner.Application.csproj" />
+        <ProjectReference Include="..\..\src\MealPlanner.Data\MealPlanner.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>
