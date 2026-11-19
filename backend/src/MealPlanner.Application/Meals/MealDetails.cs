@@ -22,25 +22,29 @@ internal sealed class MealDetailsValidator<T> : IValidator<T> where T : IRequest
 /// </summary>
 internal static class MealDetailsRules
 {
-    public static void Validate(IMealDetails meal, ValidationState validationState)
+    public static void Validate(IMealDetails meal, ValidationState validationState, string prefix = "")
     {
-        validationState.IsNotNullEmptyOrWhitespace(meal.Name, nameof(meal.Name));
+        validationState.IsNotNullEmptyOrWhitespace(meal.Name, prefix + nameof(meal.Name));
 
-        if (!validationState.IsNotEmpty(meal.Ingredients, nameof(meal.Ingredients)))
+        if (!validationState.IsNotEmpty(meal.Ingredients, prefix + nameof(meal.Ingredients)))
         {
             return;
         }
 
-        foreach (IngredientRequest ingredient in meal.Ingredients)
+        for (int i = 0; i < meal.Ingredients.Count; i++)
         {
-            validationState.IsNonEmptyGuid(ingredient.FoodId, nameof(ingredient.FoodId));
+            IngredientRequest ingredient = meal.Ingredients[i];
 
-            validationState.IsPositive(ingredient.Quantity, nameof(ingredient.Quantity));
+            string ingredientPrefix = $"{prefix}{nameof(meal.Ingredients)}[{i}].";
+
+            validationState.IsNonEmptyGuid(ingredient.FoodId, ingredientPrefix + nameof(ingredient.FoodId));
+
+            validationState.IsPositive(ingredient.Quantity, ingredientPrefix + nameof(ingredient.Quantity));
         }
 
         validationState.AddErrorIf(
             meal.Ingredients.DistinctBy(x => x.FoodId).Count() != meal.Ingredients.Count,
-            nameof(meal.Ingredients),
+            prefix + nameof(meal.Ingredients),
             "Must not contain the same food more than once.");
     }
 }

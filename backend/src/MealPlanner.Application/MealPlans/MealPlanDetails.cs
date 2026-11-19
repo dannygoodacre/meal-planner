@@ -21,9 +21,11 @@ internal sealed class MealPlanDetailsValidator<T> : IValidator<T> where T : IReq
             return;
         }
 
+        int index = 0;
+
         foreach (IMealDetails meal in request.Meals)
         {
-            MealDetailsRules.Validate(meal, validationState);
+            MealDetailsRules.Validate(meal, validationState, $"{nameof(request.Meals)}[{index++}].");
         }
     }
 }
