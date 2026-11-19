@@ -1,24 +1,24 @@
 import { Fragment } from 'react';
 import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react';
-import { Controller, useFieldArray, useWatch } from 'react-hook-form';
+import { useFieldArray, useFormState, useWatch } from 'react-hook-form';
 
-import FoodSearchPopover from '@/components/common/FoodSearchPopover';
+import FormArrayMessage from '@/components/common/FormArrayMessage';
 import MealSearchPopover from '@/components/common/MealSearchPopover';
-import NumberInput from '@/components/common/NumberInput';
+import IngredientRow from '@/components/features/meals/IngredientRow';
 import { Button } from '@/components/ui/button';
+import { FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { calculateMealMacros, round, scaleMacro } from '@/utils';
+import { calculateMealMacros, formatMacro } from '@/utils';
 
-import type { MealPlan } from '@/types';
-import type { Control, UseFormSetValue } from 'react-hook-form';
+import type { MealPlanFormData } from '@/types';
+import type { Control } from 'react-hook-form';
 
 interface MealRowViewProps {
-  control: Control<MealPlan>;
+  control: Control<MealPlanFormData>;
   mealIndex: number;
   mealName: string;
   isEditable: boolean;
   isExpanded: boolean;
-  setValue: UseFormSetValue<MealPlan>;
   onToggleExpand: () => void;
   onForceExpand: () => void;
   onDeleteMeal: () => void;
@@ -30,7 +30,6 @@ export function MealRow({
   mealName,
   isEditable,
   isExpanded,
-  setValue,
   onToggleExpand,
   onForceExpand,
   onDeleteMeal
@@ -53,25 +52,9 @@ export function MealRow({
 
   const mealMacros = calculateMealMacros(liveIngredients);
 
-  const handleAddIngredient = () =>
-    append({
-      quantity: 0,
-      food: {
-        id: `temp-${crypto.randomUUID()}`,
-        name: '',
-        unit: 'Grams',
-        referenceQuantity: 100,
-        calories: 0,
-        protein: 0,
-        carbohydrates: 0,
-        fat: 0,
-        fibre: 0,
-        sugar: 0,
-        saturatedFat: 0,
-        salt: 0,
-        source: ''
-      }
-    });
+  const { errors } = useFormState({ control, name: `meals.${mealIndex}.ingredients` });
+
+  const handleAddIngredient = () => append({ food: null, quantity: 0 });
 
   return (
     <Fragment>
@@ -86,23 +69,26 @@ export function MealRow({
 
         <TableCell className='w-[36%] font-medium truncate'>
           {isEditable ? (
-            <Controller
+            <FormField
               control={control}
               name={`meals.${mealIndex}.name`}
               render={({ field }) => (
-                <MealSearchPopover
-                  mealName={field.value}
-                  onSearchChange={field.onChange}
-                  onSelect={selectedMeal => {
-                    field.onChange(selectedMeal.name);
-                    const copiedIngredients = (selectedMeal.ingredients || []).map(ing => ({
-                      quantity: ing.quantity,
-                      food: ing.food
-                    }));
-                    replace(copiedIngredients);
-                    onForceExpand();
-                  }}
-                />
+                <FormItem>
+                  <MealSearchPopover
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onSelect={selectedMeal => {
+                      field.onChange(selectedMeal.name);
+                      const copiedIngredients = (selectedMeal.ingredients || []).map(ing => ({
+                        quantity: ing.quantity,
+                        food: ing.food
+                      }));
+                      replace(copiedIngredients);
+                      onForceExpand();
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
               )}
             />
           ) : (
@@ -110,21 +96,23 @@ export function MealRow({
           )}
         </TableCell>
 
-        <TableCell className='text-right w-[11%]'>{round(mealMacros.calories, 0)}</TableCell>
-        <TableCell className='text-right w-[11%]'>{round(mealMacros.protein)}</TableCell>
+        <TableCell className='text-right w-[11%]'>{formatMacro('calories', mealMacros.calories)}</TableCell>
+        <TableCell className='text-right w-[11%]'>{formatMacro('protein', mealMacros.protein)}</TableCell>
 
-        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.carbohydrates)}</TableCell>
+        <TableCell className='text-right w-[7%] pr-0.5'>
+          {formatMacro('carbohydrates', mealMacros.carbohydrates)}
+        </TableCell>
         <TableCell className='text-left w-[4%] pl-0.5'>
-          <span className='text-muted-foreground'>{round(mealMacros.sugar)}</span>
+          <span className='text-muted-foreground'>{formatMacro('sugar', mealMacros.sugar)}</span>
         </TableCell>
 
-        <TableCell className='text-right w-[7%] pr-0.5'>{round(mealMacros.fat)}</TableCell>
+        <TableCell className='text-right w-[7%] pr-0.5'>{formatMacro('fat', mealMacros.fat)}</TableCell>
         <TableCell className='text-left w-[4%] pl-0.5'>
-          <span className='text-muted-foreground'>{round(mealMacros.saturatedFat)}</span>
+          <span className='text-muted-foreground'>{formatMacro('saturatedFat', mealMacros.saturatedFat)}</span>
         </TableCell>
 
-        <TableCell className='text-right w-[7%]'>{round(mealMacros.fibre)}</TableCell>
-        <TableCell className='text-right w-[7%]'>{round(mealMacros.salt)}</TableCell>
+        <TableCell className='text-right w-[7%]'>{formatMacro('fibre', mealMacros.fibre)}</TableCell>
+        <TableCell className='text-right w-[7%]'>{formatMacro('salt', mealMacros.salt)}</TableCell>
 
         <TableCell className='w-[3%] pr-4 text-right'>
           {isEditable && (
@@ -147,7 +135,6 @@ export function MealRow({
       {isExpanded && (
         <TableRow className='hover:bg-transparent bg-muted/30' onClick={e => e.stopPropagation()}>
           <TableCell colSpan={11} className='pt-0 pb-6 px-0'>
-            {/*<div className='rounded-lg border bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>*/}
             <div className='border-y bg-background overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200'>
               <Table className='table-fixed w-full'>
                 <TableBody>
@@ -158,116 +145,19 @@ export function MealRow({
                       </TableCell>
                     </TableRow>
                   )}
-                  {ingredients.map((ingField, ingIndex) => {
-                    const currentIng = liveIngredients[ingIndex] || ingField;
-                    const referenceQuantity = currentIng.food?.referenceQuantity || 100;
-                    const quantity = currentIng.quantity || 0;
-
-                    const liveCals = scaleMacro(currentIng.food?.calories || 0, quantity, referenceQuantity);
-                    const liveProtein = scaleMacro(currentIng.food?.protein || 0, quantity, referenceQuantity);
-                    const liveCarbs = scaleMacro(currentIng.food?.carbohydrates || 0, quantity, referenceQuantity);
-                    const liveSugars = scaleMacro(currentIng.food?.sugar || 0, quantity, referenceQuantity);
-                    const liveFat = scaleMacro(currentIng.food?.fat || 0, quantity, referenceQuantity);
-                    const liveSats = scaleMacro(currentIng.food?.saturatedFat || 0, quantity, referenceQuantity);
-                    const liveFibre = scaleMacro(currentIng.food?.fibre || 0, quantity, referenceQuantity);
-                    const liveSalt = scaleMacro(currentIng.food?.salt || 0, quantity, referenceQuantity);
-
-                    return (
-                      <TableRow key={ingField.id} className='h-8 group/ing'>
-                        <TableCell className='w-[6%]' />
-
-                        <TableCell className='py-2 font-medium w-[24%]'>
-                          {isEditable ? (
-                            <FoodSearchPopover
-                              foodName={currentIng.food?.name || ''}
-                              isSelected={!!currentIng.food?.id}
-                              onSearchChange={newValue => {
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.name`, newValue);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.quantity`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.id`, '');
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.calories`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.protein`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.carbohydrates`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.sugar`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.fat`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.saturatedFat`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.fibre`, 0);
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}.food.salt`, 0);
-                              }}
-                              onSelect={selectedFood => {
-                                setValue(`meals.${mealIndex}.ingredients.${ingIndex}`, {
-                                  quantity: 100,
-                                  food: selectedFood
-                                });
-                              }}
-                            />
-                          ) : (
-                            <span className='truncate block'>{currentIng.food?.name || ''}</span>
-                          )}
-                        </TableCell>
-
-                        <TableCell className='py-1 w-[6%]'>
-                          {isEditable ? (
-                            <div className='flex items-center gap-1.5 w-full'>
-                              <Controller
-                                control={control}
-                                name={`meals.${mealIndex}.ingredients.${ingIndex}.quantity`}
-                                render={({ field }) => (
-                                  <NumberInput
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    className='h-7 w-12 px-1 py-0 text-xs text-center shrink-0 min-w-0'
-                                  />
-                                )}
-                              />
-                              <span className='text-xs shrink-0 whitespace-nowrap text-muted-foreground'>
-                                {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className='flex items-center h-7 py-2 text-xs'>
-                              {quantity} {currentIng.food?.unit === 'Grams' ? 'g' : 'pcs'}
-                            </div>
-                          )}
-                        </TableCell>
-
-                        <TableCell className='py-2 text-right w-[11%]'>{round(liveCals)}</TableCell>
-                        <TableCell className='py-2 text-right w-[11%]'>{round(liveProtein)}</TableCell>
-
-                        {/* Carbs + Sugars split */}
-                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveCarbs)}</TableCell>
-                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
-                          <span className='text-muted-foreground'>{round(liveSugars)}</span>
-                        </TableCell>
-
-                        {/* Fat + Sats split */}
-                        <TableCell className='py-2 text-right w-[7%] pr-0.5'>{round(liveFat)}</TableCell>
-                        <TableCell className='py-2 text-left w-[4%] pl-0.5'>
-                          <span className='text-muted-foreground'>{round(liveSats)}</span>
-                        </TableCell>
-
-                        <TableCell className='py-2 text-right w-[7%]'>{round(liveFibre)}</TableCell>
-                        <TableCell className='py-2 text-right w-[7%]'>{round(liveSalt, 2)}</TableCell>
-
-                        <TableCell className='py-1 w-[6%] pr-4 text-right'>
-                          {isEditable && (
-                            <Button
-                              variant='ghost'
-                              size='icon'
-                              className='h-6 w-6 text-muted-foreground hover:text-destructive cursor-pointer'
-                              onClick={() => remove(ingIndex)}
-                              title='Remove ingredient'
-                            >
-                              <X className='h-3.5 w-3.5' />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {ingredients.map((ingField, ingIndex) => (
+                    <IngredientRow
+                      key={ingField.id}
+                      name={`meals.${mealIndex}.ingredients.${ingIndex}`}
+                      isEditable={isEditable}
+                      onRemove={() => remove(ingIndex)}
+                    />
+                  ))}
                 </TableBody>
               </Table>
             </div>
+
+            <FormArrayMessage error={errors.meals?.[mealIndex]?.ingredients} />
 
             {isEditable && (
               <Button

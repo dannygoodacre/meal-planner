@@ -1,9 +1,5 @@
-import AddNewMealPlan from '@/components/features/mealplan/AddNewMealPlan';
+import MealPlanForm from '@/components/features/mealplan/MealPlanForm';
 
 export default function AddNewMealPlanPage() {
-  return (
-    <div className='bg-slate-50 min-h-screen w-full p-6'>
-      <AddNewMealPlan />
-    </div>
-  );
+  return <MealPlanForm />;
 }

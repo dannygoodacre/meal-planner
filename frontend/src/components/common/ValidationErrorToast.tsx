@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 
 import { ApiError } from '@/types';
 
+import type { UseFormSetError } from 'react-hook-form';
+
 export function showValidationErrorToast(error: ApiError): void {
   toast.error(
     <div className='flex flex-col gap-2 text-sm max-w-sm'>
@@ -26,3 +28,14 @@ export function showValidationErrorToast(error: ApiError): void {
     </div>
   );
 }
+
+// The client-side duplicate check is only a hint; the backend's 409 is authoritative.
+export const showNameConflictOrToast =
+  (setError: UseFormSetError<{ name: string }>) =>
+  (error: ApiError): void => {
+    if (error.status === 409) {
+      setError('name', { message: error.message }, { shouldFocus: true });
+    } else {
+      showValidationErrorToast(error);
+    }
+  };

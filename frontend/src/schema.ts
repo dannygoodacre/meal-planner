@@ -1,12 +1,15 @@
 import { z } from 'zod';
 
+// These schemas validate form input. API responses are cast to the inferred types in api/, not parsed.
+
 const requiredString = z.string().min(1, 'Required');
 
-const nonNegativeNumber = z.number().min(0);
+// Number inputs hold '' while being typed; show "Required" instead of zod's type message.
+const number = z.number({ error: issue => (issue.code === 'invalid_type' ? 'Required' : undefined) });
 
-const positiveInteger = z.number().int().positive();
+const nonNegativeNumber = number.min(0, 'Must be 0 or more');
 
-const positiveNumber = z.number().positive();
+const positiveInteger = number.int('Must be a whole number').positive('Must be more than 0');
 
 interface SubMacroFields {
   sugar: number;
@@ -34,8 +37,8 @@ export const IngredientDtoSchema = z.object({
 const BaseFoodSchema = z.object({
   name: requiredString,
   unit: z.enum(['Grams', 'Count']),
-  referenceQuantity: z.number().int().min(1),
-  calories: z.number().int().min(0),
+  referenceQuantity: positiveInteger,
+  calories: number.int('Must be a whole number').min(0, 'Must be 0 or more'),
   protein: nonNegativeNumber,
   carbohydrates: nonNegativeNumber,
   sugar: nonNegativeNumber,
@@ -64,13 +67,52 @@ export const AddMealRequestSchema = z.object({
   ingredients: z.array(IngredientDtoSchema)
 });
 
-export const MealFormSchema = z.object({
+export const MealSchema = z.object({
+  id: z.guid(),
   name: requiredString,
   ingredients: z.array(IngredientSchema)
 });
 
-export const MealSchema = MealFormSchema.extend({
-  id: z.guid()
+// Form rows hold the whole picked food (for live macros), or null until one is picked; only its id is sent.
+export const IngredientFormSchema = z.object({
+  food: z
+    .custom<z.infer<typeof FoodSchema> | null>()
+    .refine(food => food !== null, 'Pick a food')
+    .transform(food => food as z.infer<typeof FoodSchema>),
+  quantity: positiveInteger
+});
+
+const IngredientsFormSchema = z
+  .array(IngredientFormSchema)
+  .min(1, 'Add at least one ingredient')
+  .superRefine((ingredients, ctx) => {
+    const seen = new Set<string>();
+
+    ingredients.forEach((ingredient, index) => {
+      if (seen.has(ingredient.food.id)) {
+        ctx.addIssue({ code: 'custom', message: 'This food is already in the meal', path: [index, 'food'] });
+      }
+
+      seen.add(ingredient.food.id);
+    });
+  });
+
+export const MealFormSchema = z.object({
+  name: requiredString,
+  ingredients: IngredientsFormSchema
+});
+
+export const MealPlanFormSchema = z.object({
+  name: requiredString,
+  meals: z
+    .array(
+      z.object({
+        id: z.guid().nullable(),
+        name: requiredString,
+        ingredients: IngredientsFormSchema
+      })
+    )
+    .min(1, 'Add at least one meal')
 });
 
 export const AddMealPlanMealDtoSchema = z.object({
@@ -98,15 +140,4 @@ export const UpdateMealPlanMealRequestSchema = z.object({
 export const UpdateMealPlanRequestSchema = z.object({
   name: requiredString,
   meals: z.array(UpdateMealPlanMealRequestSchema)
-});
-
-export const MacrosSchema = z.object({
-  calories: positiveNumber,
-  protein: positiveNumber,
-  carbohydrates: positiveNumber,
-  sugar: positiveNumber,
-  fat: positiveNumber,
-  saturatedFat: positiveNumber,
-  fibre: positiveNumber,
-  salt: positiveNumber
 });

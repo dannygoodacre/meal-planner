@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-import type { Ingredient, Macros, Meal } from '@/types';
+import type { IngredientFormData, Macros } from '@/types';
 import type { ClassValue } from 'clsx';
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
@@ -16,6 +16,11 @@ export const toNormalizedString = (value: string | null | undefined): string =>
         .replace(/[\u0300-\u036f]/g, '')
         .normalize('NFC');
 
+// matches the backend SearchTermValidator
+export const MIN_SEARCH_LENGTH = 3;
+
+export const defaultQuantity = (unit: 'Grams' | 'Count'): number => (unit === 'Count' ? 1 : 100);
+
 export const round = (num: number, decimals: number = 1): number => {
   const factor = Math.pow(10, decimals);
 
@@ -29,44 +34,45 @@ export const scaleMacro = (macro: number, currentQuantity: number, referenceQuan
   return (macro / referenceQuantity) * currentQuantity;
 };
 
-export const calculateMealMacros = (ingredients: Ingredient[]): Macros =>
-  ingredients.reduce(
-    (totals, ingredient) => {
-      const food = ingredient.food;
+export const MACRO_KEYS = [
+  'calories',
+  'protein',
+  'carbohydrates',
+  'sugar',
+  'fat',
+  'saturatedFat',
+  'fibre',
+  'salt'
+] as const satisfies readonly (keyof Macros)[];
 
-      const referenceQuantity = ingredient.food?.referenceQuantity || 100;
+const mapMacros = (fn: (key: keyof Macros) => number): Macros =>
+  Object.fromEntries(MACRO_KEYS.map(key => [key, fn(key)])) as Macros;
 
-      const quantity = ingredient.quantity || 0;
+// Display precision per macro (6.7): used everywhere macros are shown.
+export const MACRO_DECIMALS: Macros = {
+  calories: 0,
+  protein: 1,
+  carbohydrates: 1,
+  sugar: 1,
+  fat: 1,
+  saturatedFat: 1,
+  fibre: 1,
+  salt: 2
+};
 
-      totals.calories += scaleMacro(food.calories, quantity, referenceQuantity);
-      totals.protein += scaleMacro(food.protein, quantity, referenceQuantity);
-      totals.carbohydrates += scaleMacro(food.carbohydrates, quantity, referenceQuantity);
-      totals.sugar += scaleMacro(food.sugar, quantity, referenceQuantity);
-      totals.fat += scaleMacro(food.fat, quantity, referenceQuantity);
-      totals.saturatedFat += scaleMacro(food.saturatedFat, quantity, referenceQuantity);
-      totals.fibre += scaleMacro(food.fibre, quantity, referenceQuantity);
-      totals.salt += scaleMacro(food.salt, quantity, referenceQuantity);
+export const formatMacro = (key: keyof Macros, value: number): number => round(value, MACRO_DECIMALS[key]);
 
-      return totals;
-    },
-    { calories: 0, protein: 0, carbohydrates: 0, sugar: 0, fat: 0, saturatedFat: 0, fibre: 0, salt: 0 }
-  );
+export const unitLabel = (unit: 'Grams' | 'Count'): string => (unit === 'Count' ? 'pcs' : 'g');
 
-export const calculatePlanMacros = (meals: Meal[]): Macros =>
-  meals.reduce(
-    (totals, meal) => {
-      const mealTotals = calculateMealMacros(meal.ingredients || []);
+export const ZERO_MACROS: Macros = mapMacros(() => 0);
 
-      totals.calories += mealTotals.calories;
-      totals.protein += mealTotals.protein;
-      totals.carbohydrates += mealTotals.carbohydrates;
-      totals.sugar += mealTotals.sugar;
-      totals.fat += mealTotals.fat;
-      totals.saturatedFat += mealTotals.saturatedFat;
-      totals.fibre += mealTotals.fibre;
-      totals.salt += mealTotals.salt;
+export const sumMacros = (a: Macros, b: Macros): Macros => mapMacros(key => a[key] + b[key]);
 
-      return totals;
-    },
-    { calories: 0, protein: 0, carbohydrates: 0, sugar: 0, fat: 0, saturatedFat: 0, fibre: 0, salt: 0 }
-  );
+export const ingredientMacros = ({ food, quantity }: IngredientFormData): Macros =>
+  food ? mapMacros(key => scaleMacro(food[key], quantity, food.referenceQuantity)) : ZERO_MACROS;
+
+export const calculateMealMacros = (ingredients: IngredientFormData[]): Macros =>
+  ingredients.map(ingredientMacros).reduce(sumMacros, ZERO_MACROS);
+
+export const calculatePlanMacros = (meals: { ingredients: IngredientFormData[] }[]): Macros =>
+  meals.map(meal => calculateMealMacros(meal.ingredients)).reduce(sumMacros, ZERO_MACROS);

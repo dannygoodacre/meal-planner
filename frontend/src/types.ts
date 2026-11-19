@@ -5,9 +5,10 @@ import {
   AddMealPlanRequestSchema,
   AddMealRequestSchema,
   FoodSchema,
+  IngredientFormSchema,
   IngredientSchema,
-  MacrosSchema,
   MealFormSchema,
+  MealPlanFormSchema,
   MealPlanSchema,
   MealSchema,
   UpdateMealPlanRequestSchema
@@ -25,11 +26,13 @@ export interface SearchResponse<TResponse> {
 }
 
 export class ApiError extends Error {
+  status: number;
   details?: ValidationProblemDetails;
 
-  constructor(message: string, details?: ValidationProblemDetails) {
+  constructor(message: string, status: number, details?: ValidationProblemDetails) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
     this.details = details;
   }
 }
@@ -56,8 +59,26 @@ export type Meal = z.infer<typeof MealSchema>;
 
 export type MealPlan = z.infer<typeof MealPlanSchema>;
 
-export type MealFormData = z.infer<typeof MealFormSchema>;
+// *FormData is what the form holds (food may be null); *FormResult is what a valid submit yields.
+export type IngredientFormData = z.input<typeof IngredientFormSchema>;
+
+export type MealFormData = z.input<typeof MealFormSchema>;
+
+export type MealFormResult = z.output<typeof MealFormSchema>;
+
+export type MealPlanFormData = z.input<typeof MealPlanFormSchema>;
+
+export type MealPlanFormResult = z.output<typeof MealPlanFormSchema>;
 
 export type UpdateMealPlanRequest = z.infer<typeof UpdateMealPlanRequestSchema>;
 
-export type Macros = z.infer<typeof MacrosSchema>;
+export type Macros = {
+  calories: number;
+  protein: number;
+  carbohydrates: number;
+  sugar: number;
+  fat: number;
+  saturatedFat: number;
+  fibre: number;
+  salt: number;
+};

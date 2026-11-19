@@ -10,4 +10,4 @@ export const updateMealPlan = (id: string, mealPlan: UpdateMealPlanRequest): Pro
   put<string>(`/api/mealplan/${id}`, mealPlan);
 
 export const searchMealPlansByName = (query: string): Promise<SearchResponse<MealPlan>> =>
-  get<SearchResponse<MealPlan>>(`/api/mealplan/search?q=${query}`);
+  get<SearchResponse<MealPlan>>(`/api/mealplan/search?q=${encodeURIComponent(query)}`);

@@ -7,15 +7,16 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
-import { cn, toNormalizedString } from '@/utils';
+import { cn, MIN_SEARCH_LENGTH, toNormalizedString } from '@/utils';
 
-import type { AddFoodRequest, SearchableItem, SearchResponse } from '@/types';
+import type { SearchQuery } from '@/api/queryKeys';
+import type { AddFoodRequest, SearchableItem } from '@/types';
 
 interface SearchCheckProps<T extends SearchableItem> {
   label: string;
   placeholder?: string;
   isNameEditable?: boolean;
-  search: (query: string) => Promise<SearchResponse<T>>;
+  searchQuery: (term: string) => SearchQuery<T>;
   onMatchChange?: (hasMatch: boolean) => void;
   excludeName?: string;
 }
@@ -24,7 +25,7 @@ export default function SearchCheck<T extends SearchableItem>({
   label,
   placeholder,
   isNameEditable = true,
-  search,
+  searchQuery,
   onMatchChange,
   excludeName
 }: SearchCheckProps<T>) {
@@ -35,9 +36,8 @@ export default function SearchCheck<T extends SearchableItem>({
   const debouncedName = useDebounce(nameValue, 500);
 
   const { data, isFetching } = useQuery({
-    queryKey: [label, debouncedName],
-    queryFn: () => search(debouncedName),
-    enabled: debouncedName.length >= 3 && isNameEditable
+    ...searchQuery(debouncedName),
+    enabled: debouncedName.trim().length >= MIN_SEARCH_LENGTH && isNameEditable
   });
 
   const filteredItems =
@@ -81,7 +81,7 @@ export default function SearchCheck<T extends SearchableItem>({
         )}
       />
 
-      {isNameEditable && debouncedName.length >= 3 && (
+      {isNameEditable && debouncedName.trim().length >= MIN_SEARCH_LENGTH && (
         <div className='animate-in fade-in slide-in-from-top-1'>
           {data && hasExactMatch ? (
             <Alert variant='destructive' className='bg-destructive/5 border-destructive/20'>

@@ -2,26 +2,24 @@ import { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 
-import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react';
+import type { ChangeEvent, ComponentProps, FocusEvent, KeyboardEvent } from 'react';
 
-interface NumberInputProps {
+// Other input props (id, aria-*, name, ref, onBlur) pass through so it works inside FormControl.
+type NumberInputProps = Omit<ComponentProps<typeof Input>, 'value' | 'onChange' | 'type' | 'step'> & {
   value?: number;
   onChange: (value: number) => void;
-  className?: string;
   step?: number | string;
-  min?: number;
-  placeholder?: string;
-  disabled?: boolean;
-}
+};
 
 export default function NumberInput({
   value,
   onChange,
+  onBlur,
   className,
   step = 'any',
   min = 0,
   placeholder = '0',
-  disabled = false
+  ...props
 }: NumberInputProps) {
   const [prevValue, setPrevValue] = useState<number | undefined>(value);
 
@@ -39,6 +37,8 @@ export default function NumberInput({
   }
 
   const handleOnBlur = (e: FocusEvent<HTMLInputElement>) => {
+    onBlur?.(e);
+
     const value = e.target.value;
 
     if (value === '' || isNaN(parseFloat(value))) {
@@ -101,6 +101,7 @@ export default function NumberInput({
 
   return (
     <Input
+      {...props}
       className={`no-spinner ${className || ''}`}
       min={min}
       placeholder={placeholder}
@@ -111,7 +112,6 @@ export default function NumberInput({
       onChange={handleOnChange}
       onFocus={e => e.target.select()}
       onKeyDown={handleOnKeyDown}
-      disabled={disabled}
     />
   );
 }

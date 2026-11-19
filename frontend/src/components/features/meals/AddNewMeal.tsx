@@ -1,22 +1,25 @@
 import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Utensils } from 'lucide-react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { searchMealsByName } from '@/api/meal';
+import { mealSearchQuery } from '@/api/queryKeys';
+import FormArrayMessage from '@/components/common/FormArrayMessage';
 import NutritionBox from '@/components/common/NutritionBox';
 import SearchCheck from '@/components/common/SearchCheck';
 import SubmitButton from '@/components/common/SubmitButton';
-import { showValidationErrorToast } from '@/components/common/ValidationErrorToast.tsx';
+import { showNameConflictOrToast } from '@/components/common/ValidationErrorToast.tsx';
 import IngredientRow from '@/components/features/meals/IngredientRow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import useNewMeal from '@/hooks/useNewMeal';
+import { MealFormSchema } from '@/schema';
 import { calculateMealMacros } from '@/utils';
 
-import type { AddMealRequest, MealFormData } from '@/types';
+import type { AddMealRequest, MealFormData, MealFormResult } from '@/types';
 
 interface AddNewMealProps {
   name?: string;
@@ -24,29 +27,11 @@ interface AddNewMealProps {
 }
 
 export default function AddNewMeal({ name = '', isNameEditable = true }: AddNewMealProps) {
-  const form = useForm<MealFormData>({
+  const form = useForm<MealFormData, unknown, MealFormResult>({
+    resolver: zodResolver(MealFormSchema),
     defaultValues: {
       name: name,
-      ingredients: [
-        {
-          quantity: 0,
-          food: {
-            id: '',
-            name: '',
-            unit: 'Grams',
-            referenceQuantity: 0,
-            calories: 0,
-            protein: 0,
-            carbohydrates: 0,
-            sugar: 0,
-            fat: 0,
-            saturatedFat: 0,
-            fibre: 0,
-            salt: 0,
-            source: ''
-          }
-        }
-      ]
+      ingredients: [{ food: null, quantity: 0 }]
     }
   });
 
@@ -58,7 +43,7 @@ export default function AddNewMeal({ name = '', isNameEditable = true }: AddNewM
 
   const { mutate, isPending } = useNewMeal();
 
-  const onSubmit = (formData: MealFormData) => {
+  const onSubmit = (formData: MealFormResult) => {
     const payload: AddMealRequest = {
       name: formData.name,
       ingredients: formData.ingredients.map(ingredient => {
@@ -75,7 +60,7 @@ export default function AddNewMeal({ name = '', isNameEditable = true }: AddNewM
 
         form.reset();
       },
-      onError: showValidationErrorToast
+      onError: showNameConflictOrToast(form.setError)
     });
   };
 
@@ -98,67 +83,55 @@ export default function AddNewMeal({ name = '', isNameEditable = true }: AddNewM
                   label='Meal name'
                   placeholder='e.g. Leg day steak & rice'
                   isNameEditable={isNameEditable}
-                  search={searchMealsByName}
+                  searchQuery={mealSearchQuery}
                   onMatchChange={setIsDuplicate}
                 />
               </div>
             </div>
 
             <div className='rounded-md border'>
-              <Table>
+              <Table className='table-fixed w-full'>
                 <TableHeader className='bg-muted/50'>
                   <TableRow>
-                    <TableHead className='w-2.5'></TableHead>
-                    <TableHead>Ingredients</TableHead>
-                    <TableHead className='w-35'>Quantity</TableHead>
-                    <TableHead className='w-10'></TableHead>
+                    <TableHead className='w-[6%]' />
+                    <TableHead className='text-xs w-[24%]'>Ingredient</TableHead>
+                    <TableHead className='text-xs w-[6%]'>Qty</TableHead>
+                    <TableHead className='text-xs text-right w-[11%]'>Calories</TableHead>
+                    <TableHead className='text-xs text-right w-[11%]'>Protein</TableHead>
+                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Carbs</TableHead>
+                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
+                      <span className='text-muted-foreground'>(Sugars)</span>
+                    </TableHead>
+                    <TableHead className='text-xs text-right w-[7%] pr-0.5'>Fat</TableHead>
+                    <TableHead className='text-xs text-left w-[4%] pl-0.5'>
+                      <span className='text-muted-foreground'>(Sat)</span>
+                    </TableHead>
+                    <TableHead className='text-xs text-right w-[7%]'>Fibre</TableHead>
+                    <TableHead className='text-xs text-right w-[7%]'>Salt</TableHead>
+                    <TableHead className='w-[6%]' />
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
-                  {fields.map((field, index) => {
-                    const currentIngredient = ingredients[index];
-
-                    return (
-                      <IngredientRow
-                        key={field.id}
-                        index={index}
-                        remove={remove}
-                        setValue={form.setValue}
-                        foodName={currentIngredient?.food.name || ''}
-                        unit={currentIngredient?.food.unit || 'Grams'}
-                        control={form.control}
-                      />
-                    );
-                  })}
+                  {fields.map((field, index) => (
+                    <IngredientRow
+                      key={field.id}
+                      name={`ingredients.${index}`}
+                      isEditable={true}
+                      onRemove={() => remove(index)}
+                    />
+                  ))}
                 </TableBody>
               </Table>
             </div>
+
+            <FormArrayMessage error={form.formState.errors.ingredients} />
 
             <Button
               type='button'
               variant='outline'
               className='w-full border-dashed border-2 h-12 my-6'
-              onClick={() =>
-                append({
-                  quantity: 0,
-                  food: {
-                    id: '',
-                    name: '',
-                    unit: 'Grams',
-                    referenceQuantity: 0,
-                    calories: 0,
-                    protein: 0,
-                    carbohydrates: 0,
-                    sugar: 0,
-                    fat: 0,
-                    saturatedFat: 0,
-                    fibre: 0,
-                    salt: 0,
-                    source: ''
-                  }
-                })
-              }
+              onClick={() => append({ food: null, quantity: 0 })}
             >
               <Plus className='mr-2 h-4 w-4' /> Add another ingredient
             </Button>

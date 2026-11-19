@@ -1,23 +1,13 @@
 import { Apple, Beef, Droplet, Flame, Leaf, Stone } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/utils';
+import { cn, MACRO_DECIMALS } from '@/utils';
 
+import type { Macros } from '@/types';
 import type { LucideIcon } from 'lucide-react';
 
-interface MacroTotals {
-  calories: number;
-  protein: number;
-  carbohydrates: number;
-  sugar: number;
-  fat: number;
-  saturatedFat: number;
-  fibre: number;
-  salt: number;
-}
-
 interface NutritionBoxProps {
-  totals: MacroTotals;
+  totals: Macros;
 }
 
 export default function NutritionBox({ totals }: NutritionBoxProps) {
@@ -33,43 +23,56 @@ export default function NutritionBox({ totals }: NutritionBoxProps) {
 
   const fatPercentage = totalMacroCalories > 0 ? Math.round((fatCalories / totalMacroCalories) * 100) : 0;
 
-  const round = (val: number) => Math.round(val * 10) / 10;
-
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr] gap-4'>
       <div className='flex flex-col gap-4'>
-        <NutrientBox label='Calories' total={round(totals.calories)} unit='kcal' icon={Flame} theme='orange' />
+        <NutrientBox
+          label='Calories'
+          total={totals.calories}
+          decimalPlaces={MACRO_DECIMALS.calories}
+          unit='kcal'
+          icon={Flame}
+          theme='orange'
+        />
 
         <div className='grid grid-cols-2 gap-4'>
-          <NutrientBox label='Fibre' total={round(totals.fibre)} unit='g' icon={Leaf} theme='green' />
-          <NutrientBox label='Salt' total={round(totals.salt)} unit='g' decimalPlaces={1} icon={Stone} theme='blue' />
+          <NutrientBox
+            label='Fibre'
+            total={totals.fibre}
+            decimalPlaces={MACRO_DECIMALS.fibre}
+            unit='g'
+            icon={Leaf}
+            theme='green'
+          />
+          <NutrientBox
+            label='Salt'
+            total={totals.salt}
+            unit='g'
+            decimalPlaces={MACRO_DECIMALS.salt}
+            icon={Stone}
+            theme='blue'
+          />
         </div>
       </div>
 
-      <MacroBox
-        label='Protein'
-        total={round(totals.protein)}
-        caloriePercentage={proteinPercentage}
-        icon={Beef}
-        theme='red'
-      />
+      <MacroBox label='Protein' total={totals.protein} caloriePercentage={proteinPercentage} icon={Beef} theme='red' />
 
       <MacroBox
         label='Carbs'
-        total={round(totals.carbohydrates)}
+        total={totals.carbohydrates}
         caloriePercentage={carbPercentage}
         subTotalLabel='Sugars'
-        subTotal={round(totals.sugar)}
+        subTotal={totals.sugar}
         icon={Apple}
         theme='amber'
       />
 
       <MacroBox
         label='Fat'
-        total={round(totals.fat)}
+        total={totals.fat}
         caloriePercentage={fatPercentage}
         subTotalLabel='Saturates'
-        subTotal={round(totals.saturatedFat)}
+        subTotal={totals.saturatedFat}
         icon={Droplet}
         theme='green'
       />
@@ -137,7 +140,9 @@ function MacroBox({ label, total, caloriePercentage, subTotalLabel, subTotal, ic
             </span>
           </div>
 
-          <p className='text-xl font-bold whitespace-nowrap tracking-tight'>{total.toFixed(1)} g</p>
+          <p className='text-xl font-bold whitespace-nowrap tracking-tight'>
+            {total.toFixed(MACRO_DECIMALS.protein)} g
+          </p>
 
           <div
             className={cn(
@@ -147,7 +152,9 @@ function MacroBox({ label, total, caloriePercentage, subTotalLabel, subTotal, ic
             )}
           >
             <span className='truncate pr-1'>{subTotalLabel}:</span>
-            <span className='font-semibold text-foreground whitespace-nowrap'>{subTotal?.toFixed(1)} g</span>
+            <span className='font-semibold text-foreground whitespace-nowrap'>
+              {subTotal?.toFixed(MACRO_DECIMALS.sugar)} g
+            </span>
           </div>
         </div>
       </CardContent>

@@ -29,9 +29,16 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
     if (rawText) {
       try {
-        problemDetails = JSON.parse(rawText) as ValidationProblemDetails;
+        const parsed: unknown = JSON.parse(rawText);
 
-        errorTitle = problemDetails.title || errorTitle;
+        // Conflict and UnprocessableEntity return a bare JSON string message.
+        if (typeof parsed === 'string') {
+          errorTitle = parsed;
+        } else {
+          problemDetails = parsed as ValidationProblemDetails;
+
+          errorTitle = problemDetails.title || errorTitle;
+        }
       } catch {
         errorTitle = rawText;
       }
@@ -40,7 +47,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
     // Ignore stream reading errors and fallback to status code.
   }
 
-  throw new ApiError(errorTitle, problemDetails);
+  throw new ApiError(errorTitle, res.status, problemDetails);
 }
 
 async function request<TResponse, TBody = unknown>(

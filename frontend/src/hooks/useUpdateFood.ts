@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateFood } from '@/api/food';
+import { queryKeys } from '@/api/queryKeys';
 
 import type { AddFoodRequest, ApiError } from '@/types';
 
@@ -10,6 +11,6 @@ export default function useUpdateFood() {
   return useMutation<string, ApiError, { id: string; food: AddFoodRequest }>({
     mutationFn: async ({ id, food }) => await updateFood(id, food),
 
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['foods'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.food.all })
   });
 }

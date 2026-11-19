@@ -1,33 +1,47 @@
 import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { List, Pencil, Plus, Save } from 'lucide-react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import FormArrayMessage from '@/components/common/FormArrayMessage';
 import NutritionBox from '@/components/common/NutritionBox';
-import { showValidationErrorToast } from '@/components/common/ValidationErrorToast.tsx';
+import { showNameConflictOrToast } from '@/components/common/ValidationErrorToast.tsx';
 import { MealRow } from '@/components/features/mealplan/MealRow';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import useNewMealPlan from '@/hooks/useNewMealPlan';
 import useUpdateMealPlan from '@/hooks/useUpdateMealPlan';
+import { MealPlanFormSchema } from '@/schema';
 import { calculatePlanMacros } from '@/utils';
 
-import type { MealPlan, UpdateMealPlanRequest } from '@/types';
+import type { MealPlan, MealPlanFormData, MealPlanFormResult, UpdateMealPlanRequest } from '@/types';
 
-interface MealPlanEditorProps {
-  initialState: MealPlan;
+interface MealPlanFormProps {
+  // Absent: create a new plan. Present: view it, with an Edit toggle.
+  initialState?: MealPlan;
 }
 
-export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
-  const [isEditable, setIsEditable] = useState<boolean>(false);
+export default function MealPlanForm({ initialState }: MealPlanFormProps) {
+  const isNew = !initialState;
+
+  const [isEditable, setIsEditable] = useState<boolean>(isNew);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
-  const { mutate, isPending } = useUpdateMealPlan();
+  const create = useNewMealPlan();
+  const update = useUpdateMealPlan();
+  const isPending = create.isPending || update.isPending;
 
-  const form = useForm<MealPlan>({
-    mode: 'onSubmit',
+  const navigate = useNavigate();
+
+  const form = useForm<MealPlanFormData, unknown, MealPlanFormResult>({
+    resolver: zodResolver(MealPlanFormSchema),
     defaultValues: initialState
+      ? { name: initialState.name, meals: initialState.meals }
+      : { name: '', meals: [{ id: null, name: '', ingredients: [] }] }
   });
 
   const {
@@ -42,25 +56,17 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
   const allLiveMeals = useWatch({ control: form.control, name: 'meals' }) || [];
   const planName = useWatch({ control: form.control, name: 'name' }) || '';
 
-  const toggleRow = (mealId: string) => setExpandedRows(prev => ({ ...prev, [mealId]: !prev[mealId] }));
+  const setRowExpandedState = (fieldId: string, isExpanded: boolean) =>
+    setExpandedRows(prev => ({ ...prev, [fieldId]: isExpanded }));
 
-  const setRowExpandedState = (mealId: string, isExpanded: boolean) =>
-    setExpandedRows(prev => ({ ...prev, [mealId]: isExpanded }));
+  const handleAddNewMeal = () => appendMeal({ id: null, name: '', ingredients: [] });
 
-  const handleAddNewMeal = () => {
-    const newMealId = `temp-${crypto.randomUUID()}`;
-
-    appendMeal({ id: newMealId, name: '', ingredients: [] });
-
-    setExpandedRows(prev => ({ ...prev, [newMealId]: true }));
-  };
-
-  function onSubmit(formData: MealPlan) {
+  function onSubmit(formData: MealPlanFormResult) {
     const requestData: UpdateMealPlanRequest = {
       name: formData.name,
       meals: formData.meals.map(meal => ({
         name: meal.name,
-        id: meal.id.startsWith('temp-') ? null : meal.id,
+        id: meal.id,
         ingredients: meal.ingredients.map(ingredient => ({
           foodId: ingredient.food.id,
           quantity: ingredient.quantity
@@ -68,8 +74,25 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
       }))
     };
 
-    mutate(
-      { id: formData.id, mealPlan: requestData },
+    const onError = showNameConflictOrToast(form.setError);
+
+    if (!initialState) {
+      create.mutate(
+        { name: requestData.name, meals: requestData.meals.map(({ name, ingredients }) => ({ name, ingredients })) },
+        {
+          onSuccess: id => {
+            toast.success('Meal plan created');
+            navigate(`/mealplan/${id}`);
+          },
+          onError
+        }
+      );
+
+      return;
+    }
+
+    update.mutate(
+      { id: initialState.id, mealPlan: requestData },
       {
         onSuccess: () => {
           setIsEditable(false);
@@ -78,13 +101,13 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
 
           toast.success('Meal plan updated');
         },
-        onError: showValidationErrorToast
+        onError
       }
     );
   }
 
   const handleCancel = () => {
-    form.reset(initialState);
+    form.reset();
     setIsEditable(false);
   };
 
@@ -110,8 +133,10 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
                         type='text'
                         placeholder='Meal plan name...'
                         className='h-10 text-xl font-bold'
+                        autoFocus={isNew}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -127,20 +152,22 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
               </Button>
             )}
 
-            <Button
-              type='button'
-              onClick={() => (isEditable ? handleCancel() : setIsEditable(true))}
-              variant={isEditable ? 'destructive' : 'default'}
-              className='cursor-pointer'
-            >
-              {isEditable ? (
-                'Cancel'
-              ) : (
-                <>
-                  <Pencil className='mr-2 h-4 w-4' /> Edit
-                </>
-              )}
-            </Button>
+            {!isNew && (
+              <Button
+                type='button'
+                onClick={() => (isEditable ? handleCancel() : setIsEditable(true))}
+                variant={isEditable ? 'outline' : 'default'}
+                className='cursor-pointer'
+              >
+                {isEditable ? (
+                  'Cancel'
+                ) : (
+                  <>
+                    <Pencil className='mr-2 h-4 w-4' /> Edit
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -179,6 +206,10 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
             {meals.map((mealField, index) => {
               const currentMeal = allLiveMeals[index] || mealField;
 
+              // new meals start open; meals with errors stay open so the errors are visible
+              const isExpanded =
+                !!form.formState.errors.meals?.[index] || (expandedRows[mealField.id] ?? !currentMeal.id);
+
               return (
                 <MealRow
                   key={mealField.id}
@@ -186,9 +217,8 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
                   mealIndex={index}
                   mealName={currentMeal.name}
                   isEditable={isEditable}
-                  isExpanded={!!expandedRows[mealField.id]}
-                  setValue={form.setValue}
-                  onToggleExpand={() => toggleRow(mealField.id)}
+                  isExpanded={isExpanded}
+                  onToggleExpand={() => setRowExpandedState(mealField.id, !isExpanded)}
                   onForceExpand={() => setRowExpandedState(mealField.id, true)}
                   onDeleteMeal={() => removeMeal(index)}
                 />
@@ -196,6 +226,8 @@ export default function MealPlanEditor({ initialState }: MealPlanEditorProps) {
             })}
           </TableBody>
         </Table>
+
+        <FormArrayMessage error={form.formState.errors.meals} />
 
         {isEditable && (
           <div className='mt-4'>

@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import FoodSearchPopover from '@/components/common/FoodSearchPopover';
 import MealPlanSearchPopover from '@/components/common/MealPlanSearchPopover';
-import MealSearchPopover from '@/components/common/MealSearchPopover';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-import type { Food, Meal, MealPlan } from '@/types';
+import type { Food, MealPlan } from '@/types';
 
 const createActions = [
   {
@@ -34,32 +33,20 @@ const createActions = [
 export default function HomePage() {
   const [planSearchTerm, setPlanSearchTerm] = useState<string>('');
 
-  const [mealSearchTerm, setMealSearchTerm] = useState<string>('');
-
   const [foodSearchTerm, setFoodSearchTerm] = useState<string>('');
 
   const navigate = useNavigate();
 
   const handlePlanSelect = (selectedPlan: MealPlan) => {
-    setPlanSearchTerm(selectedPlan.name);
-
     navigate(`/mealplan/${selectedPlan.id}`);
   };
 
-  const handleMealSelect = (selectedMeal: Meal) => {
-    setMealSearchTerm(selectedMeal.name);
-
-    navigate(`/meal/${selectedMeal.id}`);
-  };
-
   const handleFoodSelect = (selectedFood: Food) => {
-    setFoodSearchTerm(selectedFood.name);
-
     navigate(`/food/${selectedFood.id}`);
   };
 
   return (
-    <div className='w-full max-w-2xl mx-auto pt-16 px-4'>
+    <div className='w-full max-w-2xl mx-auto pt-10'>
       <Card className='border shadow-md bg-card'>
         <CardHeader className='text-center space-y-2 pb-6'>
           <div className='mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-1'>
@@ -89,21 +76,9 @@ export default function HomePage() {
                 Meal Plans
               </label>
               <MealPlanSearchPopover
-                searchTerm={planSearchTerm}
-                onSearchChange={setPlanSearchTerm}
-                onPlanSelect={handlePlanSelect}
-              />
-            </div>
-
-            <div className='space-y-1.5'>
-              <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5'>
-                Meals
-              </label>
-              <MealSearchPopover
-                mealName={mealSearchTerm}
-                onSearchChange={setMealSearchTerm}
-                onSelect={handleMealSelect}
-                showCreateMealFromScratch={false}
+                value={planSearchTerm}
+                onValueChange={setPlanSearchTerm}
+                onSelect={handlePlanSelect}
               />
             </div>
 
@@ -112,12 +87,10 @@ export default function HomePage() {
                 Food
               </label>
               <FoodSearchPopover
-                isSelected={false}
-                foodName={foodSearchTerm}
-                onSearchChange={setFoodSearchTerm}
+                value={foodSearchTerm}
+                onValueChange={setFoodSearchTerm}
                 onSelect={handleFoodSelect}
-                doShowAddNewMeal={false}
-                keepOpenUntilSelection={false}
+                allowAddNew={false}
               />
             </div>
           </div>
