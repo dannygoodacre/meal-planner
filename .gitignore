@@ -1,0 +1,10 @@
+# Repo-wide ignores. Stack-specific ones live in backend/.gitignore and frontend/.gitignore.
+
+# Environment files
+.env
+
+# IDE
+.idea/
+
+# Python (scripts/)
+__pycache__/

@@ -1,0 +1,93 @@
+name: Update changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version being released, e.g. 0.2.0 (leave empty for an Unreleased section)"
+        required: false
+        type: string
+        default: ""
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      fail-if-unchanged:
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      pr:
+        description: "Number of the changelog PR, empty if CHANGELOG.md already has a section for the version"
+        value: ${{ jobs.changelog.outputs.pr }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    env:
+      VERSION: ${{ inputs.version }}
+      FAIL_IF_UNCHANGED: ${{ inputs.fail-if-unchanged }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # A section written by hand (such as the first release) is used as is.
+      - name: Check for an existing section
+        id: existing
+        run: |
+          if [ -n "$VERSION" ] && grep -qF "## [$VERSION]" CHANGELOG.md; then
+            echo "CHANGELOG.md already has a section for $VERSION, so there is nothing to generate."
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: taiki-e/install-action@v2
+        if: steps.existing.outputs.found != 'true'
+        with:
+          tool: git-cliff
+
+      - name: Generate changelog
+        if: steps.existing.outputs.found != 'true'
+        run: |
+          TAG=()
+          if [ -n "$VERSION" ]; then TAG=(--tag "v$VERSION"); fi
+          git cliff --unreleased "${TAG[@]}" --prepend CHANGELOG.md
+
+      - name: Create PR if changed
+        id: pr
+        if: steps.existing.outputs.found != 'true'
+        run: |
+          if [ -z "$(git status --porcelain -- CHANGELOG.md)" ]; then
+            echo "No user-facing changes since the last tag, so the changelog is unchanged."
+            if [ "$FAIL_IF_UNCHANGED" = true ]; then
+              echo "::error::No changelog changes for v$VERSION, so there is nothing to release."
+              exit 1
+            fi
+            exit 0
+          fi
+
+          BRANCH="changelog/${VERSION:-unreleased}-$(date -u +%Y%m%d%H%M%S)"
+          TITLE="docs(changelog): update changelog${VERSION:+ for $VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git switch -c "$BRANCH"
+          git add CHANGELOG.md
+          git commit -m "$TITLE"
+          git push -u origin "$BRANCH"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "$TITLE" \
+            --body "Generated \`CHANGELOG.md\` from conventional commits. Edit it down to the changes users care about, then merge it. If a release run opened this PR, approve that run's \`release\` environment after merging."
+          echo "pr=$(gh pr view "$BRANCH" --json number --jq .number)" >> "$GITHUB_OUTPUT"

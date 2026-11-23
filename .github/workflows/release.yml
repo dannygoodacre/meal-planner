@@ -1,0 +1,179 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.2.0 or 0.2.0-alpha.1"
+        required: true
+        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  VERSION: ${{ inputs.version }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Validate version and branch
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$VERSION' is not a valid version. Use MAJOR.MINOR.PATCH with an optional -prerelease suffix."
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Run releases from main, not $GITHUB_REF."
+            exit 1
+          fi
+
+      - name: Check tag does not exist
+        run: |
+          if gh api "repos/$GH_REPO/git/matching-refs/tags/v$VERSION" --jq '.[].ref' | grep -qxF "refs/tags/v$VERSION"; then
+            echo "::error::Tag v$VERSION already exists. Choose a new version."
+            exit 1
+          fi
+
+  changelog:
+    needs: validate
+    uses: ./.github/workflows/changelog.yml
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      version: ${{ inputs.version }}
+      fail-if-unchanged: true
+
+  # Waits for a reviewer on the "release" environment: merge the changelog PR, then approve.
+  approve:
+    needs: changelog
+    runs-on: ubuntu-latest
+    environment: release
+    permissions: {}
+    steps:
+      - run: echo "Approved release of v$VERSION."
+
+  resolve:
+    needs: [changelog, approve]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ needs.changelog.outputs.pr }}
+    steps:
+      - name: Resolve the commit to release
+        id: commit
+        run: |
+          # No PR means CHANGELOG.md on main already had the section, so release the commit the run started from.
+          if [ -z "$PR" ]; then
+            echo "sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          read -r state base sha < <(gh pr view "$PR" \
+            --json state,baseRefName,mergeCommit \
+            --jq '[.state, .baseRefName, .mergeCommit.oid] | @tsv')
+          if [ "$state" != MERGED ] || [ "$base" != main ] || [ -z "$sha" ]; then
+            echo "::error::Changelog PR #$PR is not merged into main (state: $state)."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+  ci:
+    needs: resolve
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.resolve.outputs.sha }}
+
+  # Runs before the image push so a release without a changelog entry publishes nothing.
+  notes:
+    needs: resolve
+    runs-on: ubuntu-latest
+    outputs:
+      notes: ${{ steps.extract.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+      - id: extract
+        run: |
+          NOTES=$(awk -v h="## [$VERSION]" 'index($0, h) == 1 { f = 1; next } f && /^## / { exit } f' CHANGELOG.md)
+          if [ -z "$(tr -d '[:space:]' <<< "$NOTES")" ]; then
+            echo "::error::CHANGELOG.md has no section for $VERSION. Keep the '## [$VERSION]' heading when editing the changelog PR."
+            exit 1
+          fi
+          { echo "notes<<EOF_NOTES"; echo "$NOTES"; echo "EOF_NOTES"; } >> "$GITHUB_OUTPUT"
+
+  image:
+    needs: [resolve, ci, notes]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # 0.1.0 -> tags 0.1.0 and latest; pre-releases (0.1.0-alpha.1) get only their exact tag.
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}},value=v${{ inputs.version }}
+            type=raw,value=latest,enable=${{ !contains(inputs.version, '-') }}
+          labels: org.opencontainers.image.revision=${{ needs.resolve.outputs.sha }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          build-args: VERSION=${{ steps.meta.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Creates the v<version> tag on the released commit along with the release.
+  release:
+    needs: [resolve, image, notes]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - run: |
+          PRERELEASE=()
+          if [[ "$VERSION" == *-* ]]; then PRERELEASE=(--prerelease); fi
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          PACKAGE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pkgs/container/${IMAGE##*/}"
+          # shellcheck disable=SC2016 # the backticks are a Markdown code fence, not a command
+          BODY=$(printf '%s\n\n## Docker image\n\n```shell\ndocker pull %s:%s\n```\n\n[View on GitHub Packages](%s)\n' \
+            "$NOTES" "$IMAGE" "$VERSION" "$PACKAGE_URL")
+          gh release create "v$VERSION" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "${{ needs.resolve.outputs.sha }}" \
+            --title "v$VERSION" \
+            --notes "$BODY" \
+            "${PRERELEASE[@]}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: ${{ needs.notes.outputs.notes }}
