@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-# Newest push wins; an in-flight deploy is cancelled rather than queued.
 concurrency:
   group: deploy-dev
   cancel-in-progress: true
@@ -13,7 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  # Tests the PR merge commit; nothing is built or deployed unless this passes.
   ci:
     uses: ./.github/workflows/ci.yml
 
@@ -61,7 +59,6 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-      # The server-side script validates the tag and runs compose pull/up for that environment.
       - run: tailscale ssh "deploy@$DEPLOY_HOST" deploy dev "$TAG"
         env:
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
