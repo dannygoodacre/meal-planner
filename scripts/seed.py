@@ -5,17 +5,22 @@ Usage: python scripts/seed.py [base_url]   (default http://localhost:5192)
 
 DESTRUCTIVE: deletes all foods, meals and meal plans in the dev DB container before seeding.
 Schema and migration history are kept, so the API can stay running.
+
+To seed the deployed dev server, point docker at it and override the DB settings:
+    DOCKER_HOST=ssh://<user>@<host> SEED_DB_CONTAINER=<container> SEED_DB_NAME=meal_planner SEED_DB_USER=meal_planner \\
+        python scripts/seed.py https://<host>:8443
 """
 import json
+import os
 import subprocess
 import sys
 import urllib.error
 import urllib.request
 
 BASE_URL = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5192").rstrip("/")
-DB_CONTAINER = "meal-planner-dev-db"
-DB_NAME = "meal-planner"
-DB_USER = "postgres"
+DB_CONTAINER = os.environ.get("SEED_DB_CONTAINER", "meal-planner-dev-db")
+DB_NAME = os.environ.get("SEED_DB_NAME", "meal-planner")
+DB_USER = os.environ.get("SEED_DB_USER", "postgres")
 
 SOURCE = "https://www.nutritionix.com"  # API requires an http(s) URL; values below are approximate
 
