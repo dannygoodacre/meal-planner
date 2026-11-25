@@ -3,6 +3,8 @@ name: Deploy dev
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 concurrency:
   group: deploy-dev
@@ -37,12 +39,21 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=false
           tags: type=raw,value=dev-${{ github.sha }}
+      - id: version
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            echo "value=0.0.0-pr.$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=0.0.0-main.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          PR_NUMBER: ${{ github.event.number }}
       - uses: docker/build-push-action@v7
         with:
           context: .
           file: backend/Dockerfile
           push: true
-          build-args: VERSION=0.0.0-pr.${{ github.event.number }}
+          build-args: VERSION=${{ steps.version.outputs.value }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
