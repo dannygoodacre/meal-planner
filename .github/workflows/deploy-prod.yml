@@ -31,7 +31,11 @@ jobs:
           fi
         env:
           VERSION: ${{ inputs.version }}
-      - uses: tailscale/github-action@v3
+      - name: Check the image exists
+        run: docker buildx imagetools inspect "ghcr.io/${GITHUB_REPOSITORY,,}:$VERSION" > /dev/null
+        env:
+          VERSION: ${{ inputs.version }}
+      - uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
