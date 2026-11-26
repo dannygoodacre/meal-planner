@@ -1,5 +1,5 @@
-import AddNewMeal from '@/features/meals/AddNewMeal';
+import MealForm from '@/features/meals/MealForm';
 
 export default function AddNewMealPage() {
-  return <AddNewMeal />;
+  return <MealForm />;
 }

@@ -8,9 +8,15 @@ interface MealSearchPopoverProps {
   value: string;
   onValueChange: (value: string) => void;
   onSelect: (meal: Meal) => void;
+  allowNewName?: boolean;
 }
 
-export default function MealSearchPopover({ value, onValueChange, onSelect }: MealSearchPopoverProps) {
+export default function MealSearchPopover({
+  value,
+  onValueChange,
+  onSelect,
+  allowNewName = true
+}: MealSearchPopoverProps) {
   return (
     <SearchPopover
       value={value}
@@ -26,8 +32,11 @@ export default function MealSearchPopover({ value, onValueChange, onSelect }: Me
           </ItemBadge>
         </>
       )}
-      footer={({ hasExactMatch, close }) =>
-        !hasExactMatch && <SearchFooterAction onClick={close}>Use "{value}" as the meal name</SearchFooterAction>
+      footer={
+        allowNewName
+          ? ({ hasExactMatch, close }) =>
+              !hasExactMatch && <SearchFooterAction onClick={close}>Use "{value}" as the meal name</SearchFooterAction>
+          : undefined
       }
     />
   );

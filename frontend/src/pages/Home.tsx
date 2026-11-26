@@ -6,8 +6,9 @@ import FoodSearchPopover from '@/components/FoodSearchPopover';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import MealPlanSearchPopover from '@/features/mealplan/MealPlanSearchPopover';
+import MealSearchPopover from '@/features/meals/MealSearchPopover';
 
-import type { Food, MealPlan } from '@/types';
+import type { Food, Meal, MealPlan } from '@/types';
 import type { ReactNode } from 'react';
 
 const createActions = [
@@ -34,12 +35,18 @@ const createActions = [
 export default function HomePage() {
   const [planSearchTerm, setPlanSearchTerm] = useState<string>('');
 
+  const [mealSearchTerm, setMealSearchTerm] = useState<string>('');
+
   const [foodSearchTerm, setFoodSearchTerm] = useState<string>('');
 
   const navigate = useNavigate();
 
   const handlePlanSelect = (selectedPlan: MealPlan) => {
     navigate(`/mealplan/${selectedPlan.id}`);
+  };
+
+  const handleMealSelect = (selectedMeal: Meal) => {
+    navigate(`/meal/${selectedMeal.id}`);
   };
 
   const handleFoodSelect = (selectedFood: Food) => {
@@ -68,6 +75,15 @@ export default function HomePage() {
                 value={planSearchTerm}
                 onValueChange={setPlanSearchTerm}
                 onSelect={handlePlanSelect}
+              />
+            </SearchField>
+
+            <SearchField label='Meals'>
+              <MealSearchPopover
+                value={mealSearchTerm}
+                onValueChange={setMealSearchTerm}
+                onSelect={handleMealSelect}
+                allowNewName={false}
               />
             </SearchField>
 

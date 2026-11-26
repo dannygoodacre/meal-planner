@@ -10,6 +10,7 @@ import HomePage from '@/pages/Home';
 import Layout from '@/pages/Layout';
 import NotFoundPage from '@/pages/NotFound';
 import UpdateFoodPage from '@/pages/UpdateFood';
+import ViewMealPage from '@/pages/ViewMeal';
 import ViewMealPlanPage from '@/pages/ViewMealPlan';
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ export default function App() {
             <Route path='/food/new' element={<AddNewFoodPage />} />
             <Route path='/food/:id' element={<UpdateFoodPage />} />
             <Route path='/meal/new' element={<AddNewMealPage />} />
+            <Route path='/meal/:id' element={<ViewMealPage />} />
             <Route path='*' element={<NotFoundPage />} />
           </Route>
         </Routes>
