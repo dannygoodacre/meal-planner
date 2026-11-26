@@ -4,7 +4,8 @@
 
 ### Added
 
-- View and edit saved meals (#19)
+- **Find and edit your meals.** Search your saved meals from the home page, just like plans and food. Open one to see its ingredients and nutrition, then press Edit to rename it, swap or adjust ingredients, and save, or cancel to put everything back.
+- **Go straight to a new meal.** Saving a new meal now opens it, so you can check it over or carry on editing.
 
 ## [0.1.0] - 2026-11-24
 
