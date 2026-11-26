@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0] - 2026-11-26
+
+### Added
+
+- **Find and edit your meals.** Search your saved meals from the home page, just like plans and food. Open one to see its ingredients and nutrition, then press Edit to rename it, swap or adjust ingredients, and save, or cancel to put everything back.
+- **Go straight to a new meal.** Saving a new meal now opens it, so you can check it over or carry on editing.
+
 ## [0.1.0] - 2026-11-24
 
 - **Your food library.** Add the foods you eat with their nutrition per serving: calories, protein, carbs (and sugars), fat (and saturates), fibre, and salt. Measure by weight in grams or by count in pieces, and keep a link to where the numbers came from.
