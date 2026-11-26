@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2026-11-26
+
+### Added
+
+- View and edit saved meals (#19)
+
 ## [0.1.0] - 2026-11-24
 
 - **Your food library.** Add the foods you eat with their nutrition per serving: calories, protein, carbs (and sugars), fat (and saturates), fibre, and salt. Measure by weight in grams or by count in pieces, and keep a link to where the numbers came from.
